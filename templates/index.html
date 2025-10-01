@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Study Tracker</title>
+    <style>
+        body { font-family: sans-serif; }
+        .subject { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Study Tracker</h1>
+
+    <h2>Add New Subject</h2>
+    <form action="{{ url_for('add_subject') }}" method="post">
+        <input type="text" name="name" placeholder="Subject Name">
+        <button type="submit">Add Subject</button>
+    </form>
+
+    <hr>
+
+    <h2>Subjects</h2>
+    {% for subject in subjects %}
+        <div class="subject">
+            <h3><a href="{{ url_for('subject_details', subject_id=subject.id) }}">{{ subject.name }}</a></h3>
+
+            <h4>Log Study Session</h4>
+            <form action="{{ url_for('add_session', subject_id=subject.id) }}" method="post">
+                <input type="number" name="duration" placeholder="Duration (minutes)">
+                <button type="submit">Log Session</button>
+            </form>
+
+            <h4>Set Goal</h4>
+            <form action="{{ url_for('add_goal', subject_id=subject.id) }}" method="post">
+                <input type="number" name="target_minutes" placeholder="Target (minutes)">
+                <input type="date" name="end_date">
+                <button type="submit">Set Goal</button>
+            </form>
+        </div>
+    {% endfor %}
+</body>
+</html>

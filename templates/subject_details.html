@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ subject.name }} - Details</title>
+    <style>
+        body { font-family: sans-serif; }
+        .container { margin: 20px; }
+        .sessions, .goals { margin-top: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ subject.name }}</h1>
+        <a href="{{ url_for('index') }}">Back to Home</a>
+
+        <div class="sessions">
+            <h2>Study Sessions</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Duration (minutes)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in subject.sessions %}
+                    <tr>
+                        <td>{{ session.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ session.duration_minutes }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="goals">
+            <h2>Goals</h2>
+             <table>
+                <thead>
+                    <tr>
+                        <th>Target (minutes)</th>
+                        <th>End Date</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for goal in subject.goals %}
+                    <tr>
+                        <td>{{ goal.target_minutes }}</td>
+                        <td>{{ goal.end_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ "%.2f"|format(goal.progress) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
