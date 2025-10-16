@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard - HMS{% endblock %}
+
+{% block sidebar %}
+<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('doctor_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-calendar-check"></i> My Appointments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-users"></i> My Patients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-clock"></i> Set Availability
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">
+                    <i class="fas fa-user"></i> My Profile
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="fw-bold"><i class="fas fa-user-md"></i> Doctor Dashboard</h2>
+    <p class="text-muted">Welcome, Dr. {{ doctor.full_name }} | {{ doctor.department.name }}</p>
+</div>
+
+<!-- Statistics -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card stat-card primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Today's Appointments</div>
+                        <div class="stat-number">{{ today_appointments|length }}</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar-day fa-3x text-primary" style="opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card stat-card success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Upcoming Appointments</div>
+                        <div class="stat-number">{{ upcoming_appointments|length }}</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-calendar-alt fa-3x text-success" style="opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card stat-card info">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-label">Total Patients</div>
+                        <div class="stat-number">{{ total_patients }}</div>
+                    </div>
+                    <div>
+                        <i class="fas fa-users fa-3x text-info" style="opacity: 0.3;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Appointments -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-calendar-day"></i> Today's Appointments</h5>
+            </div>
+            <div class="card-body">
+                {% if today_appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Patient Name</th>
+                                <th>Contact</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in today_appointments %}
+                            <tr>
+                                <td><strong>{{ appointment.appointment_time.strftime('%I:%M %p') }}</strong></td>
+                                <td>{{ appointment.patient.full_name }}</td>
+                                <td>{{ appointment.patient.phone or 'N/A' }}</td>
+                                <td>{{ appointment.reason or 'General Consultation' }}</td>
+                                <td>
+                                    {% if appointment.status == 'Booked' %}
+                                        <span class="badge bg-primary">{{ appointment.status }}</span>
+                                    {% elif appointment.status == 'Completed' %}
+                                        <span class="badge bg-success">{{ appointment.status }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ appointment.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if appointment.status == 'Booked' %}
+                                    <button class="btn btn-sm btn-success" title="Mark as Completed">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-info" title="Add Treatment">
+                                        <i class="fas fa-notes-medical"></i>
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-sm btn-secondary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No appointments scheduled for today</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Appointments (Next 7 Days) -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-calendar-week"></i> Upcoming Appointments (Next 7 Days)</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_appointments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Patient Name</th>
+                                <th>Contact</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for appointment in upcoming_appointments %}
+                            <tr>
+                                <td>{{ appointment.appointment_date.strftime('%d %b %Y') }}</td>
+                                <td>{{ appointment.appointment_time.strftime('%I:%M %p') }}</td>
+                                <td>{{ appointment.patient.full_name }}</td>
+                                <td>{{ appointment.patient.phone or 'N/A' }}</td>
+                                <td>{{ appointment.reason or 'General Consultation' }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ appointment.status }}</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" title="View Patient History">
+                                        <i class="fas fa-history"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No upcoming appointments in the next 7 days</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Hospital Management System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- User Types Section -->
+    <div class="row mt-5 mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="fw-bold">Who Can Use Our System?</h2>
+            <p class="text-muted">Different portals for different users</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-shield fa-4x text-primary mb-3"></i>
+                    <h4>Admin</h4>
+                    <p class="text-muted">
+                        Manage doctors, patients, appointments, and view comprehensive hospital analytics.
+                    </p>
+                    <ul class="text-start">
+                        <li>Add/Remove doctors</li>
+                        <li>View all appointments</li>
+                        <li>Manage patient records</li>
+                        <li>Generate reports</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-md fa-4x text-success mb-3"></i>
+                    <h4>Doctor</h4>
+                    <p class="text-muted">
+                        View appointments, update patient records, and manage availability.
+                    </p>
+                    <ul class="text-start">
+                        <li>View assigned appointments</li>
+                        <li>Add diagnosis & prescriptions</li>
+                        <li>Set availability schedule</li>
+                        <li>Access patient history</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-injured fa-4x text-info mb-3"></i>
+                    <h4>Patient</h4>
+                    <p class="text-muted">
+                        Book appointments, view medical history, and manage your health records.
+                    </p>
+                    <ul class="text-start">
+                        <li>Search doctors by specialty</li>
+                        <li>Book/cancel appointments</li>
+                        <li>View treatment history</li>
+                        <li>Update profile information</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white text-center py-4 mt-5">
+    <div class="container">
+        <p class="mb-0">&copy; 2025 Hospital Management System. All rights reserved.</p>
+        <p class="mb-0 mt-2">
+            <small>Made with <i class="fas fa-heart text-danger"></i> for better healthcare</small>
+        </p>
+    </div>
+</footer>
+{% endblock %} Hero Section -->
+    <div class="row align-items-center min-vh-75 py-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold text-primary mb-4">
+                Welcome to Hospital Management System
+            </h1>
+            <p class="lead text-muted mb-4">
+                A comprehensive solution for managing hospital operations, appointments, and patient records efficiently.
+            </p>
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-user-plus"></i> Register as Patient
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6 text-center">
+            <i class="fas fa-hospital-user" style="font-size: 15rem; color: #0d6efd; opacity: 0.1;"></i>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mt-5 mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="fw-bold">Our Features</h2>
+            <p class="text-muted">Everything you need to manage your hospital efficiently</p>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-calendar-check fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">Easy Appointment Booking</h5>
+                    <p class="card-text text-muted">
+                        Book, reschedule, or cancel appointments with your preferred doctor seamlessly.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-user-md fa-3x text-success"></i>
+                    </div>
+                    <h5 class="card-title">Expert Doctors</h5>
+                    <p class="card-text text-muted">
+                        Access to qualified doctors across multiple specializations for comprehensive care.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-notes-medical fa-3x text-info"></i>
+                    </div>
+                    <h5 class="card-title">Medical Records</h5>
+                    <p class="card-text text-muted">
+                        Complete history of your treatments, prescriptions, and diagnoses in one place.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-shield-alt fa-3x text-warning"></i>
+                    </div>
+                    <h5 class="card-title">Secure & Private</h5>
+                    <p class="card-text text-muted">
+                        Your medical data is encrypted and protected with industry-standard security.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-clock fa-3x text-danger"></i>
+                    </div>
+                    <h5 class="card-title">24/7 Access</h5>
+                    <p class="card-text text-muted">
+                        Access your health records and manage appointments anytime, anywhere.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="fas fa-bell fa-3x text-primary"></i>
+                    </div>
+                    <h5 class="card-title">Smart Notifications</h5>
+                    <p class="card-text text-muted">
+                        Get reminders for upcoming appointments and follow-up consultations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--
