@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}All Appointments - Admin{% endblock %}
+
+{% block sidebar %}
+<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_manage_doctors') }}">
+                    <i class="fas fa-user-md"></i> Manage Doctors
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_manage_patients') }}">
+                    <i class="fas fa-users"></i> Manage Patients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('admin_all_appointments') }}">
+                    <i class="fas fa-calendar-alt"></i> All Appointments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_manage_departments') }}">
+                    <i class="fas fa-hospital"></i> Departments
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="fw-bold"><i class="fas fa-calendar-alt"></i> All Appointments</h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td>{{ appointment.id }}</td>
+                        <td>{{ appointment.patient.full_name }}</td>
+                        <td>{{ appointment.doctor.full_name }}</td>
+                        <td>{{ appointment.appointment_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ appointment.appointment_time.strftime('%H:%M') }}</td>
+                        <td>{{ appointment.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

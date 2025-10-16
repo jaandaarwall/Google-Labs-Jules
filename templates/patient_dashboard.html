@@ -12,17 +12,17 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('patient_find_doctors') }}">
                     <i class="fas fa-search"></i> Find Doctors
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('patient_find_doctors') }}">
                     <i class="fas fa-calendar-plus"></i> Book Appointment
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('patient_my_appointments') }}">
                     <i class="fas fa-calendar-check"></i> My Appointments
                 </a>
             </li>
@@ -111,10 +111,10 @@
                     <div class="card-body">
                         <h5 class="card-title"><i class="fas fa-calendar-plus"></i> Quick Actions</h5>
                         <div class="d-grid gap-2">
-                            <a href="#" class="btn btn-primary">
+                            <a href="{{ url_for('patient_find_doctors') }}" class="btn btn-primary">
                                 <i class="fas fa-calendar-plus"></i> Book New Appointment
                             </a>
-                            <a href="#" class="btn btn-outline-primary">
+                            <a href="{{ url_for('patient_find_doctors') }}" class="btn btn-outline-primary">
                                 <i class="fas fa-search"></i> Search Doctors by Specialization
                             </a>
                         </div>

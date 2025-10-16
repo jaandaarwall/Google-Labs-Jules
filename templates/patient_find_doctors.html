@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Find Doctors - Patient{% endblock %}
+
+{% block sidebar %}
+<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('patient_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('patient_find_doctors') }}">
+                    <i class="fas fa-search"></i> Find Doctors
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('patient_my_appointments') }}">
+                    <i class="fas fa-calendar-check"></i> My Appointments
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="fw-bold"><i class="fas fa-search"></i> Find Doctors</h2>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('patient_find_doctors') }}">
+            <div class="row">
+                <div class="col-md-4">
+                    <select class="form-select" name="department_id">
+                        <option value="">All Departments</option>
+                        {% for department in departments %}
+                        <option value="{{ department.id }}">{{ department.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    {% for doctor in doctors %}
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ doctor.full_name }}</h5>
+                <p class="card-text">{{ doctor.department.name }}</p>
+                <a href="{{ url_for('patient_book_appointment', doctor_id=doctor.id) }}" class="btn btn-primary">Book Appointment</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
