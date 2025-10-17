@@ -134,7 +134,8 @@
             </div>
             <div class="card-body">
                 <div class="row">
-                    {% for department in departments|slice(0, 6) %}
+                    {% for department in departments %}
+                    {% if loop.index <= 6 %}
                     <div class="col-md-4 mb-3">
                         <div class="card h-100 border-primary">
                             <div class="card-body">
@@ -151,6 +152,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>

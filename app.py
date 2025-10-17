@@ -77,6 +77,7 @@ def login():
                 return redirect(url_for('admin_dashboard'))
             else:
                 flash('Invalid credentials!', 'danger')
+                return redirect(url_for('login'))
 
         elif role == 'doctor':
             user = Doctor.query.filter_by(username=username).first()
@@ -91,6 +92,7 @@ def login():
                 return redirect(url_for('doctor_dashboard'))
             else:
                 flash('Invalid credentials!', 'danger')
+                return redirect(url_for('login'))
 
         elif role == 'patient':
             user = Patient.query.filter_by(username=username).first()
@@ -105,6 +107,7 @@ def login():
                 return redirect(url_for('patient_dashboard'))
             else:
                 flash('Invalid credentials!', 'danger')
+                return redirect(url_for('login'))
 
     return render_template('login.html')
 
