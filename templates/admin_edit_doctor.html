@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Doctor - HMS{% endblock %}
+
+{% block sidebar %}
+<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('admin_doctors') }}">
+                    <i class="fas fa-user-md"></i> Manage Doctors
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_patients') }}">
+                    <i class="fas fa-users"></i> Manage Patients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_appointments') }}">
+                    <i class="fas fa-calendar-alt"></i> All Appointments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_search') }}">
+                    <i class="fas fa-search"></i> Search
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="fw-bold"><i class="fas fa-edit"></i> Edit Doctor</h2>
+    <p class="text-muted">Update doctor information</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin_edit_doctor', doctor_id=doctor.id) }}">
+                    <div class="row">
+                        <!-- Full Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="full_name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" 
+                                   value="{{ doctor.full_name }}" required>
+                        </div>
+
+                        <!-- Username (Read-only) -->
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" value="{{ doctor.username }}" readonly disabled>
+                            <small class="text-muted">Username cannot be changed</small>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ doctor.email }}" required>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{{ doctor.phone or '' }}" pattern="[0-9]{10}">
+                        </div>
+
+                        <!-- Department/Specialization -->
+                        <div class="col-md-6 mb-3">
+                            <label for="department_id" class="form-label">Specialization *</label>
+                            <select class="form-select" id="department_id" name="department_id" required>
+                                {% for department in departments %}
+                                <option value="{{ department.id }}" {% if department.id == doctor.department_id %}selected{% endif %}>
+                                    {{ department.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Qualification -->
+                        <div class="col-md-6 mb-3">
+                            <label for="qualification" class="form-label">Qualification</label>
+                            <input type="text" class="form-control" id="qualification" name="qualification" 
+                                   value="{{ doctor.qualification or '' }}">
+                        </div>
+
+                        <!-- Experience Years -->
+                        <div class="col-md-12 mb-3">
+                            <label for="experience_years" class="form-label">Years of Experience</label>
+                            <input type="number" class="form-control" id="experience_years" name="experience_years" 
+                                   value="{{ doctor.experience_years }}" min="0" max="50">
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('admin_doctors') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Doctor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
