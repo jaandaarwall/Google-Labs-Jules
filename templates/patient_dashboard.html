@@ -17,22 +17,17 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('patient_find_doctors') }}">
-                    <i class="fas fa-calendar-plus"></i> Book Appointment
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('patient_appointments') }}">
                     <i class="fas fa-calendar-check"></i> My Appointments
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('patient_medical_history') }}">
                     <i class="fas fa-notes-medical"></i> Medical History
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('patient_profile') }}">
                     <i class="fas fa-user"></i> My Profile
                 </a>
             </li>
@@ -65,7 +60,7 @@
                     <i class="fas fa-tint"></i> Blood Group: <strong>{{ patient.blood_group }}</strong>
                 </p>
                 {% endif %}
-                <a href="#" class="btn btn-outline-primary btn-sm mt-2">
+                <a href="{{ url_for('patient_profile') }}" class="btn btn-outline-primary btn-sm mt-2">
                     <i class="fas fa-edit"></i> Edit Profile
                 </a>
             </div>
@@ -75,35 +70,39 @@
     <div class="col-md-8">
         <div class="row">
             <div class="col-md-6 mb-3">
-                <div class="card stat-card primary">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-label">Upcoming Appointments</div>
-                                <div class="stat-number">{{ upcoming_appointments|length }}</div>
-                            </div>
-                            <div>
-                                <i class="fas fa-calendar-alt fa-3x text-primary" style="opacity: 0.3;"></i>
+                <a href="{{ url_for('patient_appointments') }}" class="text-decoration-none">
+                    <div class="card stat-card primary">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="stat-label">Upcoming Appointments</div>
+                                    <div class="stat-number">{{ upcoming_appointments|length }}</div>
+                                </div>
+                                <div>
+                                    <i class="fas fa-calendar-alt fa-3x text-primary" style="opacity: 0.3;"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <div class="col-md-6 mb-3">
-                <div class="card stat-card success">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="stat-label">Completed Visits</div>
-                                <div class="stat-number">{{ past_appointments|length }}</div>
-                            </div>
-                            <div>
-                                <i class="fas fa-check-circle fa-3x text-success" style="opacity: 0.3;"></i>
+                <a href="{{ url_for('patient_medical_history') }}" class="text-decoration-none">
+                    <div class="card stat-card success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="stat-label">Completed Visits</div>
+                                    <div class="stat-number">{{ past_appointments|length }}</div>
+                                </div>
+                                <div>
+                                    <i class="fas fa-check-circle fa-3x text-success" style="opacity: 0.3;"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <div class="col-12">
@@ -111,10 +110,10 @@
                     <div class="card-body">
                         <h5 class="card-title"><i class="fas fa-calendar-plus"></i> Quick Actions</h5>
                         <div class="d-grid gap-2">
-                            <a href="#" class="btn btn-primary">
+                            <a href="{{ url_for('patient_find_doctors') }}" class="btn btn-primary">
                                 <i class="fas fa-calendar-plus"></i> Book New Appointment
                             </a>
-                            <a href="#" class="btn btn-outline-primary">
+                            <a href="{{ url_for('patient_find_doctors') }}" class="btn btn-outline-primary">
                                 <i class="fas fa-search"></i> Search Doctors by Specialization
                             </a>
                         </div>
@@ -129,12 +128,13 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
-            <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="fas fa-hospital"></i> Available Specializations</h5>
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                 <h5 class="mb-0"><i class="fas fa-hospital"></i> Available Specializations</h5>
+                 <a href="{{ url_for('patient_find_doctors') }}" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body">
                 <div class="row">
-                    {% for department in departments %}
+                    {% for department in departments|slice(0, 6) %}
                     <div class="col-md-4 mb-3">
                         <div class="card h-100 border-primary">
                             <div class="card-body">
@@ -145,7 +145,7 @@
                                 <p class="mb-2"><small class="text-muted">
                                     <i class="fas fa-user-md"></i> {{ department.doctors_count }} doctor(s) available
                                 </small></p>
-                                <a href="#" class="btn btn-sm btn-outline-primary w-100">
+                                <a href="{{ url_for('patient_find_doctors', department_id=department.id) }}" class="btn btn-sm btn-outline-primary w-100">
                                     View Doctors
                                 </a>
                             </div>
@@ -164,7 +164,7 @@
         <div class="card">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-calendar-check"></i> Upcoming Appointments</h5>
-                <a href="#" class="btn btn-sm btn-primary">View All</a>
+                <a href="{{ url_for('patient_appointments') }}" class="btn btn-sm btn-primary">View All</a>
             </div>
             <div class="card-body">
                 {% if upcoming_appointments %}
@@ -173,33 +173,21 @@
                         <thead>
                             <tr>
                                 <th>Date</th>
-                                <th>Time</th>
                                 <th>Doctor</th>
                                 <th>Specialization</th>
-                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for appointment in upcoming_appointments %}
                             <tr>
-                                <td>{{ appointment.appointment_date.strftime('%d %b %Y') }}</td>
-                                <td>{{ appointment.appointment_time.strftime('%I:%M %p') }}</td>
+                                <td>{{ appointment.appointment_date.strftime('%d %b %Y') }} at {{ appointment.appointment_time.strftime('%I:%M %p') }}</td>
                                 <td>Dr. {{ appointment.doctor.full_name }}</td>
                                 <td>{{ appointment.doctor.department.name }}</td>
                                 <td>
-                                    <span class="badge bg-primary">{{ appointment.status }}</span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-warning" title="Reschedule">
-                                        <i class="fas fa-calendar-alt"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" title="Cancel">
-                                        <i class="fas fa-times"></i>
-                                    </button>
+                                    <a href="{{ url_for('patient_cancel_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-danger" title="Cancel" onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -210,7 +198,7 @@
                 <div class="text-center py-4">
                     <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
                     <p class="text-muted">No upcoming appointments</p>
-                    <a href="#" class="btn btn-primary">Book Your First Appointment</a>
+                    <a href="{{ url_for('patient_find_doctors') }}" class="btn btn-primary">Book Your First Appointment</a>
                 </div>
                 {% endif %}
             </div>
@@ -224,7 +212,7 @@
         <div class="card">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-history"></i> Medical History</h5>
-                <a href="#" class="btn btn-sm btn-primary">View Complete History</a>
+                <a href="{{ url_for('patient_medical_history') }}" class="btn btn-sm btn-primary">View Complete History</a>
             </div>
             <div class="card-body">
                 {% if past_appointments %}
@@ -234,7 +222,6 @@
                             <tr>
                                 <th>Date</th>
                                 <th>Doctor</th>
-                                <th>Specialization</th>
                                 <th>Diagnosis</th>
                                 <th>Actions</th>
                             </tr>
@@ -244,21 +231,19 @@
                             <tr>
                                 <td>{{ appointment.appointment_date.strftime('%d %b %Y') }}</td>
                                 <td>Dr. {{ appointment.doctor.full_name }}</td>
-                                <td>{{ appointment.doctor.department.name }}</td>
                                 <td>
                                     {% if appointment.treatment %}
-                                        {{ appointment.treatment.diagnosis[:50] }}...
+                                        {{ appointment.treatment.diagnosis|truncate(50) }}
                                     {% else %}
                                         <span class="text-muted">Not available</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-info" title="View Full Details">
-                                        <i class="fas fa-file-medical"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-primary" title="Download Prescription">
-                                        <i class="fas fa-download"></i>
-                                    </button>
+                                    {% if appointment.treatment %}
+                                    <a href="{{ url_for('patient_medical_history') }}" class="btn btn-sm btn-info" title="View Full Details">
+                                        <i class="fas fa-file-medical"></i> View
+                                    </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

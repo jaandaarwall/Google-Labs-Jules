@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}View Appointment - HMS{% endblock %}
+
+{% block sidebar %}
+<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('doctor_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('doctor_appointments') }}">
+                    <i class="fas fa-calendar-check"></i> My Appointments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('doctor_patients') }}">
+                    <i class="fas fa-users"></i> My Patients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('doctor_availability') }}">
+                    <i class="fas fa-clock"></i> Set Availability
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('doctor_profile') }}">
+                    <i class="fas fa-user"></i> My Profile
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="fw-bold"><i class="fas fa-file-medical-alt"></i> Appointment Details</h2>
+    <p class="text-muted">A detailed view of the completed appointment.</p>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Appointment on {{ appointment.appointment_date.strftime('%d %b %Y') }}</h5>
+        <span class="badge bg-success">{{ appointment.status }}</span>
+    </div>
+    <div class="card-body">
+        <p><strong>Patient:</strong> {{ appointment.patient.full_name }}</p>
+        <p><strong>Time:</strong> {{ appointment.appointment_time.strftime('%I:%M %p') }}</p>
+        <p><strong>Reason for Visit:</strong> {{ appointment.reason }}</p>
+        <hr>
+
+        {% if appointment.treatment %}
+        <h5 class="mt-4">Treatment Details</h5>
+        <div class="p-3 bg-light rounded">
+            <p><strong>Diagnosis:</strong></p>
+            <p>{{ appointment.treatment.diagnosis }}</p>
+
+            <p><strong>Prescription:</strong></p>
+            <p>{{ appointment.treatment.prescription }}</p>
+
+            {% if appointment.treatment.notes %}
+            <p><strong>Notes:</strong></p>
+            <p>{{ appointment.treatment.notes }}</p>
+            {% endif %}
+
+            {% if appointment.treatment.follow_up_required %}
+            <p><strong>Follow-up Required:</strong> Yes</p>
+            <p><strong>Follow-up Date:</strong> {{ appointment.treatment.follow_up_date.strftime('%d %b %Y') if appointment.treatment.follow_up_date }}</p>
+            {% else %}
+            <p><strong>Follow-up Required:</strong> No</p>
+            {% endif %}
+        </div>
+        <a href="{{ url_for('doctor_add_treatment', appointment_id=appointment.id) }}" class="btn btn-secondary mt-3"><i class="fas fa-edit"></i> Edit Treatment</a>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted">No treatment details found for this appointment.</p>
+            <a href="{{ url_for('doctor_add_treatment', appointment_id=appointment.id) }}" class="btn btn-primary"><i class="fas fa-plus"></i> Add Treatment</a>
+        </div>
+        {% endif %}
+
+        <a href="{{ url_for('doctor_appointments') }}" class="btn btn-outline-secondary mt-3">
+            <i class="fas fa-arrow-left"></i> Back to Appointments
+        </a>
+    </div>
+</div>
+{% endblock %}

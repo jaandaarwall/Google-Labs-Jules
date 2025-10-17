@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}View Appointment - HMS{% endblock %}
+
+{% block sidebar %}
+<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_doctors') }}">
+                    <i class="fas fa-user-md"></i> Manage Doctors
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_patients') }}">
+                    <i class="fas fa-users"></i> Manage Patients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ url_for('admin_appointments') }}">
+                    <i class="fas fa-calendar-alt"></i> All Appointments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_search') }}">
+                    <i class="fas fa-search"></i> Search
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="fw-bold"><i class="fas fa-file-medical"></i> Appointment Details</h2>
+        <p class="text-muted">Detailed view of appointment #{{ appointment.id }}</p>
+    </div>
+    <a href="{{ url_for('admin_appointments') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to All Appointments
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Appointment on {{ appointment.appointment_date.strftime('%d %b %Y') }} at {{ appointment.appointment_time.strftime('%I:%M %p') }}</h5>
+        {% if appointment.status == 'Completed' %}
+            <span class="badge bg-success">{{ appointment.status }}</span>
+        {% elif appointment.status == 'Booked' %}
+            <span class="badge bg-primary">{{ appointment.status }}</span>
+        {% elif appointment.status == 'Cancelled' %}
+            <span class="badge bg-danger">{{ appointment.status }}</span>
+        {% else %}
+            <span class="badge bg-secondary">{{ appointment.status }}</span>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Patient Details</h5>
+                <p><strong>Name:</strong> {{ appointment.patient.full_name }}</p>
+                <p><strong>Email:</strong> {{ appointment.patient.email }}</p>
+                <p><strong>Phone:</strong> {{ appointment.patient.phone }}</p>
+            </div>
+            <div class="col-md-6">
+                <h5>Doctor Details</h5>
+                <p><strong>Name:</strong> Dr. {{ appointment.doctor.full_name }}</p>
+                <p><strong>Department:</strong> {{ appointment.doctor.department.name }}</p>
+                <p><strong>Email:</strong> {{ appointment.doctor.email }}</p>
+            </div>
+        </div>
+        <hr>
+        <h5>Appointment Info</h5>
+        <p><strong>Reason for Visit:</strong> {{ appointment.reason or 'N/A' }}</p>
+
+        {% if appointment.treatment %}
+            <hr>
+            <h5>Treatment Details</h5>
+            <div class="p-3 bg-light rounded">
+                <p><strong>Diagnosis:</strong> {{ appointment.treatment.diagnosis }}</p>
+                <p><strong>Prescription:</strong> {{ appointment.treatment.prescription }}</p>
+                {% if appointment.treatment.notes %}
+                    <p><strong>Notes:</strong> {{ appointment.treatment.notes }}</p>
+                {% endif %}
+                <p>
+                    <strong>Follow-up Required:</strong>
+                    {% if appointment.treatment.follow_up_required %}
+                        Yes, on {{ appointment.treatment.follow_up_date.strftime('%d %b %Y') if appointment.treatment.follow_up_date }}
+                    {% else %}
+                        No
+                    {% endif %}
+                </p>
+            </div>
+        {% else %}
+            <hr>
+            <p class="text-muted text-center">No treatment has been recorded for this appointment yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
