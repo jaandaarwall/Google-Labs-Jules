@@ -42,12 +42,75 @@
     <p class="text-muted">Manage your available time slots for appointments.</p>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <div class="text-center py-5">
-            <i class="fas fa-tools fa-3x text-muted mb-3"></i>
-            <h4 class="text-muted">Feature Under Construction</h4>
-            <p class="text-muted">This feature to set and manage your availability is coming soon!</p>
+<div class="row">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <h5>Add New Availability</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('doctor_availability') }}">
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="start_time" class="form-label">Start Time</label>
+                        <input type="time" class="form-control" id="start_time" name="start_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="end_time" class="form-label">End Time</label>
+                        <input type="time" class="form-control" id="end_time" name="end_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="total_seats" class="form-label">Total Seats</label>
+                        <input type="number" class="form-control" id="total_seats" name="total_seats" min="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Availability</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">
+                <h5>Your Current Availability</h5>
+            </div>
+            <div class="card-body">
+                {% if availabilities %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Seats</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for availability in availabilities %}
+                            <tr>
+                                <td>{{ availability.date.strftime('%d %b %Y') }}</td>
+                                <td>{{ availability.start_time.strftime('%I:%M %p') }}</td>
+                                <td>{{ availability.end_time.strftime('%I:%M %p') }}</td>
+                                <td>{{ availability.total_seats }}</td>
+                                <td>
+                                    <a href="{{ url_for('doctor_delete_availability', availability_id=availability.id) }}"
+                                       class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">You have not set any availability yet.</p>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>

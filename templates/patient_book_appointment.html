@@ -85,22 +85,9 @@
 
                         <!-- Appointment Time -->
                         <div class="col-md-6 mb-3">
-                            <label for="appointment_time" class="form-label">Appointment Time *</label>
-                            <select class="form-select" id="appointment_time" name="appointment_time" required>
-                                <option value="">Select Time</option>
-                                <option value="09:00">09:00 AM</option>
-                                <option value="09:30">09:30 AM</option>
-                                <option value="10:00">10:00 AM</option>
-                                <option value="10:30">10:30 AM</option>
-                                <option value="11:00">11:00 AM</option>
-                                <option value="11:30">11:30 AM</option>
-                                <option value="14:00">02:00 PM</option>
-                                <option value="14:30">02:30 PM</option>
-                                <option value="15:00">03:00 PM</option>
-                                <option value="15:30">03:30 PM</option>
-                                <option value="16:00">04:00 PM</option>
-                                <option value="16:30">04:30 PM</option>
-                                <option value="17:00">05:00 PM</option>
+                            <label for="appointment_time" class="form-label">Available Time Slots *</label>
+                            <select class="form-select" id="appointment_time" name="appointment_time" required disabled>
+                                <option value="">Select a date first</option>
                             </select>
                         </div>
 
@@ -134,6 +121,36 @@
 </div>
 
 <script>
+    document.getElementById('appointment_date').addEventListener('change', function() {
+        const date = this.value;
+        const doctorId = {{ doctor.id }};
+        const timeSelect = document.getElementById('appointment_time');
+
+        if (!date) {
+            timeSelect.innerHTML = '<option value="">Select a date first</option>';
+            timeSelect.disabled = true;
+            return;
+        }
+
+        fetch(`/api/doctor/${doctorId}/availability?date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                timeSelect.innerHTML = '<option value="">Select a time</option>';
+                if (data.length > 0) {
+                    data.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot.time;
+                        option.textContent = slot.time;
+                        timeSelect.appendChild(option);
+                    });
+                    timeSelect.disabled = false;
+                } else {
+                    timeSelect.innerHTML = '<option value="">No available slots</option>';
+                    timeSelect.disabled = true;
+                }
+            });
+    });
+
     // Set minimum date to tomorrow
     const today = new Date();
     today.setDate(today.getDate() + 1);
@@ -141,7 +158,7 @@
     
     // Set maximum date to 7 days from now
     const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 7);
+    maxDate.setDate(maxDate.getDate() + 30); // Allow booking up to 30 days in advance
     document.getElementById('appointment_date').max = maxDate.toISOString().split('T')[0];
 </script>
 {% endblock %}

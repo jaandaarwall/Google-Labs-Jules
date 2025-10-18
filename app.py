@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request, session
+from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify
 from models import db, Admin, Doctor, Patient, Department, Appointment, Treatment, DoctorAvailability
 from datetime import datetime, date, timedelta
 import os
@@ -401,6 +401,19 @@ def admin_view_patient(patient_id):
     return render_template('admin_view_patient.html', patient=patient, appointments=appointments)
 
 
+@app.route('/admin/doctor/view/<int:doctor_id>')
+def admin_view_doctor(doctor_id):
+    """View doctor details and their appointment history"""
+    if session.get('user_role') != 'admin':
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('login'))
+
+    doctor = Doctor.query.get_or_404(doctor_id)
+    appointments = Appointment.query.filter_by(doctor_id=doctor.id).order_by(Appointment.appointment_date.desc()).all()
+
+    return render_template('admin_view_doctor.html', doctor=doctor, appointments=appointments)
+
+
 @app.route('/admin/appointments')
 def admin_appointments():
     """View all appointments"""
@@ -480,6 +493,41 @@ def patient_find_doctors():
     return render_template('patient_find_doctors.html', doctors=doctors, departments=departments, selected_department=department)
 
 
+@app.route('/api/doctor/<int:doctor_id>/availability', methods=['GET'])
+def get_doctor_availability(doctor_id):
+    """API endpoint to get doctor availability for a specific date"""
+    date_str = request.args.get('date')
+    if not date_str:
+        return jsonify({'error': 'Date parameter is required'}), 400
+
+    try:
+        date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD.'}), 400
+
+    availabilities = DoctorAvailability.query.filter_by(doctor_id=doctor_id, date=date, is_available=True).all()
+
+    slots = []
+    for av in availabilities:
+        start_time = datetime.combine(date, av.start_time)
+        end_time = datetime.combine(date, av.end_time)
+
+        while start_time < end_time:
+            # Check if this slot is already fully booked
+            booked_count = Appointment.query.filter_by(
+                doctor_id=doctor_id,
+                appointment_date=date,
+                appointment_time=start_time.time()
+            ).count()
+
+            if booked_count < av.total_seats:
+                slots.append({'time': start_time.strftime('%H:%M')})
+
+            start_time += timedelta(minutes=30) # Assuming 30-minute slots
+
+    return jsonify(slots)
+
+
 @app.route('/patient/book/<int:doctor_id>', methods=['GET', 'POST'])
 def patient_book_appointment(doctor_id):
     """Book appointment with doctor"""
@@ -496,14 +544,26 @@ def patient_book_appointment(doctor_id):
         reason = request.form.get('reason')
 
         # Check if slot is available
-        existing = Appointment.query.filter_by(
+        availability = DoctorAvailability.query.filter(
+            DoctorAvailability.doctor_id == doctor_id,
+            DoctorAvailability.date == appointment_date,
+            DoctorAvailability.start_time <= appointment_time,
+            DoctorAvailability.end_time > appointment_time,
+            DoctorAvailability.is_available == True
+        ).first()
+
+        if not availability:
+            flash('The selected time slot is not available.', 'danger')
+            return redirect(url_for('patient_book_appointment', doctor_id=doctor_id))
+
+        booked_count = Appointment.query.filter_by(
             doctor_id=doctor_id,
             appointment_date=appointment_date,
             appointment_time=appointment_time
-        ).first()
+        ).count()
 
-        if existing:
-            flash('This time slot is already booked! Please choose another time.', 'danger')
+        if booked_count >= availability.total_seats:
+            flash('This time slot is fully booked! Please choose another time.', 'danger')
             return redirect(url_for('patient_book_appointment', doctor_id=doctor_id))
 
         # Create appointment
@@ -642,13 +702,43 @@ def doctor_availability():
     doctor = Doctor.query.get_or_404(doctor_id)
 
     if request.method == 'POST':
-        # NOTE: This is a placeholder for a more complex feature.
-        # For now, it just demonstrates the form submission.
-        flash('Availability settings updated (demo)!', 'info')
+        date = datetime.strptime(request.form.get('date'), '%Y-%m-%d').date()
+        start_time = datetime.strptime(request.form.get('start_time'), '%H:%M').time()
+        end_time = datetime.strptime(request.form.get('end_time'), '%H:%M').time()
+        total_seats = int(request.form.get('total_seats'))
+
+        availability = DoctorAvailability(
+            doctor_id=doctor_id,
+            date=date,
+            start_time=start_time,
+            end_time=end_time,
+            total_seats=total_seats
+        )
+        db.session.add(availability)
+        db.session.commit()
+        flash('Availability added successfully!', 'success')
         return redirect(url_for('doctor_availability'))
 
     availabilities = DoctorAvailability.query.filter_by(doctor_id=doctor_id).order_by(DoctorAvailability.date.desc()).all()
     return render_template('doctor_availability.html', doctor=doctor, availabilities=availabilities)
+
+
+@app.route('/doctor/availability/delete/<int:availability_id>')
+def doctor_delete_availability(availability_id):
+    """Delete doctor's availability"""
+    if session.get('user_role') != 'doctor':
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('login'))
+
+    availability = DoctorAvailability.query.get_or_404(availability_id)
+    if availability.doctor_id != session.get('user_id'):
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('doctor_availability'))
+
+    db.session.delete(availability)
+    db.session.commit()
+    flash('Availability deleted successfully!', 'success')
+    return redirect(url_for('doctor_availability'))
 
 
 @app.route('/doctor/profile', methods=['GET', 'POST'])

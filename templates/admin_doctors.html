@@ -93,6 +93,10 @@
                                        onclick="return confirm('Are you sure?')">
                                         <i class="fas fa-{% if doctor.is_active %}ban{% else %}check{% endif %}"></i>
                                     </a>
+                                     <a href="{{ url_for('admin_view_doctor', doctor_id=doctor.id) }}"
+                                       class="btn btn-sm btn-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
