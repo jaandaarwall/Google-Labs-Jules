@@ -8,10 +8,10 @@ uv venv .venv
 source .venv/bin/activate
 
 # Upgrade pip
-pip install --upgrade pip
+uv pip install --upgrade pip
 
 # Install dependencies from your requirements file
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 
 # If you have dev/test dependencies:
 
