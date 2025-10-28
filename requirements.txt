@@ -1,7 +1,6 @@
-
 Flask
 Flask-SQLAlchemy
 Flask-Security-Too
 Jinja2
 Flask-Bcrypt
-Werkzeug==3.0.1
+Werkzeug

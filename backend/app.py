@@ -1,56 +1,58 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify
-from models import db, Admin, Doctor, Patient, Department, Appointment, Treatment, DoctorAvailability
+from backend.config import Config
+from backend.Sqldatabase import db
+from backend.models import *
+from backend.user_datastore import user_datastore
+from flask_security import Security, login_user, logout_user, auth_required
+from flask_bcrypt import Bcrypt
 from datetime import datetime, date, timedelta
-import os
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key-here-change-in-production'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hospital.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+bcrypt = Bcrypt()
 
-# Initialize database
-db.init_app(app)
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+    Bcrypt(app)
+    db.init_app(app)
+    Security(app, user_datastore)
+    return app
+
+app = create_app()
 
 # Make datetime available in templates
 app.jinja_env.globals.update(datetime=datetime, timedelta=timedelta)
 
-def init_database():
-    """Initialize database and create default admin"""
+def init_db(app):
     with app.app_context():
-        # Create all tables
         db.create_all()
-
-        # Check if admin exists, if not create one
-        admin = Admin.query.filter_by(username='admin').first()
+        admin_role = user_datastore.find_or_create_role(name='admin', description='Administrator')
+        doctor_role = user_datastore.find_or_create_role(name='doctor', description='Doctor')
+        user_role = user_datastore.find_or_create_role(name='user', description='User')
+        admin = user_datastore.find_user(username='admin')
         if not admin:
-            admin = Admin(
+            hash_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
+            user_datastore.create_user(
                 username='admin',
+                full_name='Admin User',
                 email='admin@hospital.com',
-                full_name='System Administrator'
+                password=hash_password,
+                active=True,
+                roles=[admin_role, doctor_role, user_role]
             )
-            admin.set_password('admin123')  # Default password
-            db.session.add(admin)
-
-            # Create some default departments
-            departments = [
-                Department(name='Cardiology', description='Heart and cardiovascular system'),
-                Department(name='Neurology', description='Brain and nervous system'),
-                Department(name='Orthopedics', description='Bones and muscles'),
-                Department(name='Pediatrics', description='Children healthcare'),
-                Department(name='Dermatology', description='Skin, hair, and nails'),
-                Department(name='General Medicine', description='General health issues')
-            ]
-
+            db.session.commit()
+        departments = [
+            Department(name='Cardiology', description='Heart and cardiovascular system'),
+            Department(name='Neurology', description='Brain and nervous system'),
+            Department(name='Orthopedics', description='Bones and muscles'),
+            Department(name='Pediatrics', description='Children healthcare'),
+            Department(name='Dermatology', description='Skin, hair, and nails'),
+            Department(name='General Medicine', description='General health issues')
+        ]
+        existing_departments = Department.query.all()
+        if not existing_departments:
             for dept in departments:
                 db.session.add(dept)
-
             db.session.commit()
-            print("✅ Database initialized successfully!")
-            print("📝 Default Admin Created:")
-            print("   Username: admin")
-            print("   Password: admin123")
-        else:
-            print("ℹ️  Database already initialized.")
 
 
 @app.route('/')
@@ -65,71 +67,41 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        role = request.form.get('role')
 
-        if role == 'admin':
-            user = Admin.query.filter_by(username=username).first()
-            if user and user.check_password(password):
-                session['user_id'] = user.id
-                session['user_role'] = 'admin'
-                session['user_name'] = user.full_name
-                flash('Login successful!', 'success')
+        user = user_datastore.find_user(username=username)
+
+        if user and bcrypt.check_password_hash(user.password, password):
+            login_user(user)
+            flash('Login successful!', 'success')
+            if user.has_role('admin'):
                 return redirect(url_for('admin_dashboard'))
-            else:
-                flash('Invalid credentials!', 'danger')
-                return redirect(url_for('login'))
-
-        elif role == 'doctor':
-            user = Doctor.query.filter_by(username=username).first()
-            if user and user.check_password(password):
-                if not user.is_active:
-                    flash('Your account has been deactivated. Contact admin.', 'warning')
-                    return redirect(url_for('login'))
-                session['user_id'] = user.id
-                session['user_role'] = 'doctor'
-                session['user_name'] = user.full_name
-                flash('Login successful!', 'success')
+            elif user.has_role('doctor'):
                 return redirect(url_for('doctor_dashboard'))
             else:
-                flash('Invalid credentials!', 'danger')
-                return redirect(url_for('login'))
-
-        elif role == 'patient':
-            user = Patient.query.filter_by(username=username).first()
-            if user and user.check_password(password):
-                if not user.is_active:
-                    flash('Your account has been deactivated. Contact admin.', 'warning')
-                    return redirect(url_for('login'))
-                session['user_id'] = user.id
-                session['user_role'] = 'patient'
-                session['user_name'] = user.full_name
-                flash('Login successful!', 'success')
                 return redirect(url_for('patient_dashboard'))
-            else:
-                flash('Invalid credentials!', 'danger')
-                return redirect(url_for('login'))
+        else:
+            flash('Invalid credentials!', 'danger')
+            return redirect(url_for('login'))
 
     return render_template('login.html')
 
 
 @app.route('/logout')
+@auth_required()
 def logout():
     """Logout user"""
-    session.clear()
+    logout_user()
     flash('You have been logged out successfully.', 'info')
     return redirect(url_for('index'))
 
 
 @app.route('/admin/dashboard')
+@auth_required('session')
 def admin_dashboard():
     """Admin dashboard"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     # Get statistics
     total_doctors = Doctor.query.filter_by(is_active=True).count()
-    total_patients = Patient.query.filter_by(is_active=True).count()
+    total_patients = Patient.query.count()
     total_appointments = Appointment.query.count()
     today_appointments = Appointment.query.filter_by(appointment_date=date.today()).count()
 
@@ -144,34 +116,32 @@ def admin_dashboard():
                          recent_appointments=recent_appointments)
 
 
+from flask_security import current_user
+
 @app.route('/doctor/dashboard')
+@auth_required('session')
 def doctor_dashboard():
     """Doctor dashboard"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    doctor_id = session.get('user_id')
-    doctor = Doctor.query.get(doctor_id)
+    doctor = current_user.doctor
 
     # Get today's appointments
     today = date.today()
     today_appointments = Appointment.query.filter_by(
-        doctor_id=doctor_id,
+        doctor_id=doctor.id,
         appointment_date=today
     ).order_by(Appointment.appointment_time).all()
 
     # Get upcoming appointments (next 7 days)
     week_later = today + timedelta(days=7)
     upcoming_appointments = Appointment.query.filter(
-        Appointment.doctor_id == doctor_id,
+        Appointment.doctor_id == doctor.id,
         Appointment.appointment_date > today,
         Appointment.appointment_date <= week_later,
         Appointment.status == 'Booked'
     ).order_by(Appointment.appointment_date, Appointment.appointment_time).all()
 
     # Get unique patients
-    patient_ids = db.session.query(Appointment.patient_id).filter_by(doctor_id=doctor_id).distinct().all()
+    patient_ids = db.session.query(Appointment.patient_id).filter_by(doctor_id=doctor.id).distinct().all()
     total_patients = len(patient_ids)
 
     return render_template('doctor_dashboard.html',
@@ -182,28 +152,24 @@ def doctor_dashboard():
 
 
 @app.route('/patient/dashboard')
+@auth_required('session')
 def patient_dashboard():
     """Patient dashboard"""
-    if session.get('user_role') != 'patient':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    patient_id = session.get('user_id')
-    patient = Patient.query.get(patient_id)
+    patient = current_user.patient
 
     # Get all departments
     departments = Department.query.all()
 
     # Get upcoming appointments
     upcoming_appointments = Appointment.query.filter(
-        Appointment.patient_id == patient_id,
+        Appointment.patient_id == patient.id,
         Appointment.appointment_date >= date.today(),
         Appointment.status == 'Booked'
     ).order_by(Appointment.appointment_date, Appointment.appointment_time).all()
 
     # Get past appointments with treatment
     past_appointments = Appointment.query.filter(
-        Appointment.patient_id == patient_id,
+        Appointment.patient_id == patient.id,
         Appointment.status == 'Completed'
     ).order_by(Appointment.appointment_date.desc()).limit(5).all()
 
@@ -229,27 +195,31 @@ def register():
         blood_group = request.form.get('blood_group')
 
         # Check if username or email already exists
-        if Patient.query.filter_by(username=username).first():
+        if user_datastore.find_user(username=username):
             flash('Username already exists!', 'danger')
             return redirect(url_for('register'))
 
-        if Patient.query.filter_by(email=email).first():
+        if user_datastore.find_user(email=email):
             flash('Email already registered!', 'danger')
             return redirect(url_for('register'))
 
-        # Create new patient
-        patient = Patient(
+        hash_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        user_role = user_datastore.find_or_create_role(name='user', description='User')
+
+        user = user_datastore.create_user(
             username=username,
             email=email,
+            password=hash_password,
             full_name=full_name,
             phone=phone,
             date_of_birth=datetime.strptime(dob, '%Y-%m-%d').date() if dob else None,
             gender=gender,
             address=address,
-            blood_group=blood_group
+            blood_group=blood_group,
+            roles=[user_role]
         )
-        patient.set_password(password)
 
+        patient = Patient(user=user)
         db.session.add(patient)
         db.session.commit()
 
@@ -262,23 +232,17 @@ def register():
 # ==================== ADMIN ROUTES ====================
 
 @app.route('/admin/doctors')
+@auth_required('session')
 def admin_doctors():
     """Manage doctors"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     doctors = Doctor.query.all()
     return render_template('admin_doctors.html', doctors=doctors)
 
 
 @app.route('/admin/doctor/add', methods=['GET', 'POST'])
+@auth_required('session')
 def admin_add_doctor():
     """Add new doctor"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
@@ -321,12 +285,9 @@ def admin_add_doctor():
 
 
 @app.route('/admin/doctor/edit/<int:doctor_id>', methods=['GET', 'POST'])
+@auth_required('session')
 def admin_edit_doctor(doctor_id):
     """Edit doctor details"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     doctor = Doctor.query.get_or_404(doctor_id)
 
     if request.method == 'POST':
@@ -346,12 +307,9 @@ def admin_edit_doctor(doctor_id):
 
 
 @app.route('/admin/doctor/toggle/<int:doctor_id>')
+@auth_required('session')
 def admin_toggle_doctor(doctor_id):
     """Activate/Deactivate doctor"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     doctor = Doctor.query.get_or_404(doctor_id)
     doctor.is_active = not doctor.is_active
     db.session.commit()
@@ -362,23 +320,17 @@ def admin_toggle_doctor(doctor_id):
 
 
 @app.route('/admin/patients')
+@auth_required('session')
 def admin_patients():
     """Manage patients"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     patients = Patient.query.all()
     return render_template('admin_patients.html', patients=patients)
 
 
 @app.route('/admin/patient/toggle/<int:patient_id>')
+@auth_required('session')
 def admin_toggle_patient(patient_id):
     """Activate/Deactivate patient"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     patient = Patient.query.get_or_404(patient_id)
     patient.is_active = not patient.is_active
     db.session.commit()
@@ -389,12 +341,9 @@ def admin_toggle_patient(patient_id):
 
 
 @app.route('/admin/patient/view/<int:patient_id>')
+@auth_required('session')
 def admin_view_patient(patient_id):
     """View patient details and their appointment history"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     patient = Patient.query.get_or_404(patient_id)
     appointments = Appointment.query.filter_by(patient_id=patient.id).order_by(Appointment.appointment_date.desc()).all()
 
@@ -402,12 +351,9 @@ def admin_view_patient(patient_id):
 
 
 @app.route('/admin/doctor/view/<int:doctor_id>')
+@auth_required('session')
 def admin_view_doctor(doctor_id):
     """View doctor details and their appointment history"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     doctor = Doctor.query.get_or_404(doctor_id)
     appointments = Appointment.query.filter_by(doctor_id=doctor.id).order_by(Appointment.appointment_date.desc()).all()
 
@@ -415,34 +361,25 @@ def admin_view_doctor(doctor_id):
 
 
 @app.route('/admin/appointments')
+@auth_required('session')
 def admin_appointments():
     """View all appointments"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     appointments = Appointment.query.order_by(Appointment.appointment_date.desc()).all()
     return render_template('admin_appointments.html', appointments=appointments)
 
 
 @app.route('/admin/appointment/view/<int:appointment_id>')
+@auth_required('session')
 def admin_view_appointment(appointment_id):
     """View full details of an appointment"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     appointment = Appointment.query.get_or_404(appointment_id)
     return render_template('admin_view_appointment.html', appointment=appointment)
 
 
 @app.route('/admin/search', methods=['GET', 'POST'])
+@auth_required('session')
 def admin_search():
     """Search for doctors and patients"""
-    if session.get('user_role') != 'admin':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     doctors = []
     patients = []
     search_query = ''
@@ -474,12 +411,9 @@ def admin_search():
 # ==================== PATIENT ROUTES ====================
 
 @app.route('/patient/doctors')
+@auth_required('session')
 def patient_find_doctors():
     """Find doctors by specialization"""
-    if session.get('user_role') != 'patient':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     department_id = request.args.get('department_id', type=int)
 
     if department_id:
@@ -529,14 +463,11 @@ def get_doctor_availability(doctor_id):
 
 
 @app.route('/patient/book/<int:doctor_id>', methods=['GET', 'POST'])
+@auth_required('session')
 def patient_book_appointment(doctor_id):
     """Book appointment with doctor"""
-    if session.get('user_role') != 'patient':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     doctor = Doctor.query.get_or_404(doctor_id)
-    patient_id = session.get('user_id')
+    patient = current_user.patient
 
     if request.method == 'POST':
         appointment_date = datetime.strptime(request.form.get('appointment_date'), '%Y-%m-%d').date()
@@ -586,29 +517,23 @@ def patient_book_appointment(doctor_id):
 
 
 @app.route('/patient/appointments')
+@auth_required('session')
 def patient_appointments():
     """View all patient appointments"""
-    if session.get('user_role') != 'patient':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    patient_id = session.get('user_id')
-    appointments = Appointment.query.filter_by(patient_id=patient_id).order_by(Appointment.appointment_date.desc()).all()
+    patient = current_user.patient
+    appointments = Appointment.query.filter_by(patient_id=patient.id).order_by(Appointment.appointment_date.desc()).all()
 
     return render_template('patient_appointments.html', appointments=appointments)
 
 
 @app.route('/patient/cancel/<int:appointment_id>')
+@auth_required('session')
 def patient_cancel_appointment(appointment_id):
     """Cancel appointment"""
-    if session.get('user_role') != 'patient':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     appointment = Appointment.query.get_or_404(appointment_id)
 
     # Verify it's the patient's appointment
-    if appointment.patient_id != session.get('user_id'):
+    if appointment.patient_id != current_user.patient.id:
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('patient_dashboard'))
 
@@ -623,40 +548,33 @@ def patient_cancel_appointment(appointment_id):
 
 
 @app.route('/patient/history')
+@auth_required('session')
 def patient_medical_history():
     """View patient's full medical history"""
-    if session.get('user_role') != 'patient':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    patient_id = session.get('user_id')
-    appointments = Appointment.query.filter_by(patient_id=patient_id, status='Completed').order_by(Appointment.appointment_date.desc()).all()
+    patient = current_user.patient
+    appointments = Appointment.query.filter_by(patient_id=patient.id, status='Completed').order_by(Appointment.appointment_date.desc()).all()
     return render_template('patient_medical_history.html', appointments=appointments)
 
 
 @app.route('/patient/profile', methods=['GET', 'POST'])
+@auth_required('session')
 def patient_profile():
     """Manage patient's profile"""
-    if session.get('user_role') != 'patient':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    patient_id = session.get('user_id')
-    patient = Patient.query.get_or_404(patient_id)
+    patient = current_user.patient
+    user = current_user
 
     if request.method == 'POST':
-        patient.full_name = request.form.get('full_name')
-        patient.email = request.form.get('email')
-        patient.phone = request.form.get('phone')
+        user.full_name = request.form.get('full_name')
+        user.email = request.form.get('email')
+        user.phone = request.form.get('phone')
         dob_str = request.form.get('date_of_birth')
         if dob_str:
-            patient.date_of_birth = datetime.strptime(dob_str, '%Y-%m-%d').date()
-        patient.gender = request.form.get('gender')
-        patient.address = request.form.get('address')
-        patient.blood_group = request.form.get('blood_group')
+            user.date_of_birth = datetime.strptime(dob_str, '%Y-%m-%d').date()
+        user.gender = request.form.get('gender')
+        user.address = request.form.get('address')
+        user.blood_group = request.form.get('blood_group')
 
         db.session.commit()
-        session['user_name'] = patient.full_name # Update session
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('patient_profile'))
 
@@ -666,40 +584,30 @@ def patient_profile():
 # ==================== DOCTOR ROUTES ====================
 
 @app.route('/doctor/appointments')
+@auth_required('session')
 def doctor_appointments():
     """View all doctor's appointments"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    doctor_id = session.get('user_id')
-    appointments = Appointment.query.filter_by(doctor_id=doctor_id).order_by(Appointment.appointment_date.desc()).all()
+    doctor = current_user.doctor
+    appointments = Appointment.query.filter_by(doctor_id=doctor.id).order_by(Appointment.appointment_date.desc()).all()
     return render_template('doctor_appointments.html', appointments=appointments)
 
 
 @app.route('/doctor/patients')
+@auth_required('session')
 def doctor_patients():
     """View doctor's patients"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    doctor_id = session.get('user_id')
-    patient_ids = db.session.query(Appointment.patient_id).filter_by(doctor_id=doctor_id).distinct().all()
+    doctor = current_user.doctor
+    patient_ids = db.session.query(Appointment.patient_id).filter_by(doctor_id=doctor.id).distinct().all()
     patients = Patient.query.filter(Patient.id.in_([p_id for p_id, in patient_ids])).all()
 
     return render_template('doctor_patients.html', patients=patients)
 
 
 @app.route('/doctor/availability', methods=['GET', 'POST'])
+@auth_required('session')
 def doctor_availability():
     """Manage doctor's availability"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    doctor_id = session.get('user_id')
-    doctor = Doctor.query.get_or_404(doctor_id)
+    doctor = current_user.doctor
 
     if request.method == 'POST':
         date = datetime.strptime(request.form.get('date'), '%Y-%m-%d').date()
@@ -724,14 +632,11 @@ def doctor_availability():
 
 
 @app.route('/doctor/availability/delete/<int:availability_id>')
+@auth_required('session')
 def doctor_delete_availability(availability_id):
     """Delete doctor's availability"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     availability = DoctorAvailability.query.get_or_404(availability_id)
-    if availability.doctor_id != session.get('user_id'):
+    if availability.doctor_id != current_user.doctor.id:
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('doctor_availability'))
 
@@ -742,24 +647,20 @@ def doctor_delete_availability(availability_id):
 
 
 @app.route('/doctor/profile', methods=['GET', 'POST'])
+@auth_required('session')
 def doctor_profile():
     """Manage doctor's profile"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
-    doctor_id = session.get('user_id')
-    doctor = Doctor.query.get_or_404(doctor_id)
+    doctor = current_user.doctor
+    user = current_user
 
     if request.method == 'POST':
-        doctor.full_name = request.form.get('full_name')
-        doctor.email = request.form.get('email')
-        doctor.phone = request.form.get('phone')
+        user.full_name = request.form.get('full_name')
+        user.email = request.form.get('email')
+        user.phone = request.form.get('phone')
         doctor.qualification = request.form.get('qualification')
         doctor.experience_years = int(request.form.get('experience_years', 0))
 
         db.session.commit()
-        session['user_name'] = doctor.full_name # Update session name
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('doctor_profile'))
 
@@ -767,15 +668,12 @@ def doctor_profile():
 
 
 @app.route('/doctor/appointment/complete/<int:appointment_id>')
+@auth_required('session')
 def doctor_complete_appointment(appointment_id):
     """Mark an appointment as completed"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     appointment = Appointment.query.get_or_404(appointment_id)
 
-    if appointment.doctor_id != session.get('user_id'):
+    if appointment.doctor_id != current_user.doctor.id:
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('doctor_dashboard'))
 
@@ -790,15 +688,12 @@ def doctor_complete_appointment(appointment_id):
 
 
 @app.route('/doctor/appointment/treatment/<int:appointment_id>', methods=['GET', 'POST'])
+@auth_required('session')
 def doctor_add_treatment(appointment_id):
     """Add or edit treatment for an appointment"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     appointment = Appointment.query.get_or_404(appointment_id)
 
-    if appointment.doctor_id != session.get('user_id'):
+    if appointment.doctor_id != current_user.doctor.id:
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('doctor_dashboard'))
 
@@ -834,15 +729,12 @@ def doctor_add_treatment(appointment_id):
 
 
 @app.route('/doctor/appointment/view/<int:appointment_id>')
+@auth_required('session')
 def doctor_view_appointment(appointment_id):
     """View appointment and treatment details"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     appointment = Appointment.query.get_or_404(appointment_id)
 
-    if appointment.doctor_id != session.get('user_id'):
+    if appointment.doctor_id != current_user.doctor.id:
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('doctor_dashboard'))
 
@@ -850,25 +742,19 @@ def doctor_view_appointment(appointment_id):
 
 
 @app.route('/doctor/patient/history/<int:patient_id>')
+@auth_required('session')
 def doctor_patient_history(patient_id):
     """View patient's medical history with this doctor"""
-    if session.get('user_role') != 'doctor':
-        flash('Unauthorized access!', 'danger')
-        return redirect(url_for('login'))
-
     patient = Patient.query.get_or_404(patient_id)
 
     appointments = Appointment.query.filter_by(
         patient_id=patient_id,
-        doctor_id=session.get('user_id')
+        doctor_id=current_user.doctor.id
     ).order_by(Appointment.appointment_date.desc()).all()
 
     return render_template('doctor_patient_history.html', patient=patient, appointments=appointments)
 
 
 if __name__ == '__main__':
-    # Initialize database on first run
-    if not os.path.exists('hospital.db'):
-        init_database()
-
+    init_db(app)
     app.run(debug=True)
