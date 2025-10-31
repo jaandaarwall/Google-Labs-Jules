@@ -3,4 +3,5 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = 'thisisasecretkey'
     SECURITY_PASSWORD_SALT = 'thisisasecretsalt'
+    SECURITY_LOGIN_URL = '/login'
     
