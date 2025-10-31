@@ -54,6 +54,7 @@
                                 <th>ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
+                                <th>Full Name</th>
                                 <th>Phone</th>
                                 <th>Blood Group</th>
                                 <th>Gender</th>
@@ -67,17 +68,17 @@
                                 <td>#{{ patient.id }}</td>
                                 <td>{{ patient.user.username }}</td>
                                 <td>{{ patient.user.email }}</td>
-                                <td>{{ patient.phone or 'N/A' }}</td>
+                                <td>{{ patient.user.full_name }}</td>
+                                <td>{{ patient.user.phone or 'N/A' }}</td>
                                 <td>
-                                    {% if patient.user.blood_group
- %}
+                                    {% if patient.user.blood_group %}
                                         <span class="badge bg-danger">{{ patient.user.blood_group
  }}</span>
                                     {% else %}
                                         N/A
                                     {% endif %}
                                 </td>
-                                <td>{{ patient.gender or 'N/A' }}</td>
+                                <td>{{ patient.user.gender or 'N/A' }}</td>
                                 <td>
                                     {% if patient.user.active %}
                                         <span class="badge bg-success">Active</span>

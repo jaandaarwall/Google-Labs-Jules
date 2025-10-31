@@ -48,7 +48,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="full_name" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ patient.user.username }}" required>
+                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ patient.user.full_name }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="email" class="form-label">Email Address</label>
@@ -58,7 +58,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="phone" class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ patient.phone }}">
+                    <input type="tel" class="form-control" id="phone" name="phone" value="{{ patient.user.phone }}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="date_of_birth" class="form-label">Date of Birth</label>
@@ -69,20 +69,19 @@
                 <div class="col-md-6 mb-3">
                     <label for="gender" class="form-label">Gender</label>
                     <select class="form-select" id="gender" name="gender">
-                        <option value="Male" {% if patient.gender == 'Male' %}selected{% endif %}>Male</option>
-                        <option value="Female" {% if patient.gender == 'Female' %}selected{% endif %}>Female</option>
-                        <option value="Other" {% if patient.gender == 'Other' %}selected{% endif %}>Other</option>
+                        <option value="Male" {% if patient.user.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if patient.user.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if patient.user.gender == 'Other' %}selected{% endif %}>Other</option>
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="blood_group" class="form-label">Blood Group</label>
-                    <input type="text" class="form-control" id="blood_group" name="blood_group" value="{{ patient.user.blood_group
- }}">
+                    <input type="text" class="form-control" id="blood_group" name="blood_group" value="{{ patient.user.blood_group }}">
                 </div>
             </div>
             <div class="mb-3">
                 <label for="address" class="form-label">Address</label>
-                <textarea class="form-control" id="address" name="address" rows="3">{{ patient.address }}</textarea>
+                <textarea class="form-control" id="address" name="address" rows="3">{{ patient.user.address }}</textarea>
             </div>
             <hr>
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>

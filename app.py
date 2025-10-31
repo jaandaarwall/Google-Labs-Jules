@@ -182,6 +182,7 @@ def register():
         # Create new user
         new_user = user_datastore.create_user(
             username=username,
+            full_name=full_name,
             email=email,
             password=hash_password,
             active=True,
@@ -277,6 +278,7 @@ def admin_add_doctor():
         # Create new user
         new_user = user_datastore.create_user(
             username=username,
+            full_name=full_name,
             email=email,
             password=hash_password,
             active=True,
@@ -313,6 +315,7 @@ def admin_edit_doctor(doctor_id):
     user = doctor.user
 
     if request.method == 'POST':
+        user.full_name = request.form.get('full_name')
         user.email = request.form.get('email')
         user.phone = request.form.get('phone')
         doctor.department_id = request.form.get('department_id')
@@ -669,6 +672,7 @@ def patient_profile():
     user = patient.user
 
     if request.method == 'POST':
+        user.full_name = request.form.get('full_name')
         user.email = request.form.get('email')
         user.phone = request.form.get('phone')
         dob_str = request.form.get('date_of_birth')
@@ -812,6 +816,7 @@ def doctor_profile():
     user = doctor.user
 
     if request.method == 'POST':
+        user.full_name = request.form.get('full_name')
         user.email = request.form.get('email')
         user.phone = request.form.get('phone')
         doctor.qualification = request.form.get('qualification')

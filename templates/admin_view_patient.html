@@ -53,16 +53,21 @@
         <div class="card mb-4">
             <div class="card-body text-center">
                 <i class="fas fa-user-circle fa-5x text-primary mb-3"></i>
-                <h5 class="my-3">{{ patient.user.username }}</h5>
+                <h5 class="my-3">{{ patient.user.full_name }}</h5>
                 <p class="text-muted mb-1">{{ patient.user.email }}</p>
-                <p class="text-muted mb-4">{{ patient.phone }}</p>
+                <p class="text-muted mb-4">{{ patient.user.phone }}</p>
             </div>
         </div>
         <div class="card mb-4">
             <div class="card-body">
                 <div class="row">
+                    <div class="col-sm-5"><p class="mb-0"><strong>Full Name</strong></p></div>
+                    <div class="col-sm-7"><p class="text-muted mb-0">{{ patient.user.full_name }}</p></div>
+                </div>
+                <hr>
+                <div class="row">
                     <div class="col-sm-5"><p class="mb-0"><strong>Username</strong></p></div>
-                    <div class="col-sm-7"><p class="text-muted mb-0">{{ patient.username }}</p></div>
+                    <div class="col-sm-7"><p class="text-muted mb-0">{{ patient.user.username }}</p></div>
                 </div>
                 <hr>
                 <div class="row">
@@ -72,18 +77,17 @@
                 <hr>
                 <div class="row">
                     <div class="col-sm-5"><p class="mb-0"><strong>Gender</strong></p></div>
-                    <div class="col-sm-7"><p class="text-muted mb-0">{{ patient.gender }}</p></div>
+                    <div class="col-sm-7"><p class="text-muted mb-0">{{ patient.user.gender }}</p></div>
                 </div>
                 <hr>
                 <div class="row">
                     <div class="col-sm-5"><p class="mb-0"><strong>Blood Group</strong></p></div>
-                    <div class="col-sm-7"><p class="text-muted mb-0">{{ patient.user.blood_group
- }}</p></div>
+                    <div class="col-sm-7"><p class="text-muted mb-0">{{ patient.user.blood_group }}</p></div>
                 </div>
                 <hr>
                  <div class="row">
                     <div class="col-sm-5"><p class="mb-0"><strong>Address</strong></p></div>
-                    <div class="col-sm-7"><p class="text-muted mb-0">{{ patient.address }}</p></div>
+                    <div class="col-sm-7"><p class="text-muted mb-0">{{ patient.user.address }}</p></div>
                 </div>
             </div>
         </div>
@@ -112,7 +116,7 @@
                             {% for appointment in appointments %}
                             <tr>
                                 <td>{{ appointment.appointment_date.strftime('%d %b %Y') }} at {{ appointment.appointment_time.strftime('%I:%M %p') }}</td>
-                                <td>Dr. {{ appointment.doctor.user.username }}</td>
+                                <td>Dr. {{ appointment.doctor.user.full_name }}</td>
                                 <td>{{ appointment.doctor.department.name }}</td>
                                 <td>
                                     {% if appointment.status == 'Completed' %}

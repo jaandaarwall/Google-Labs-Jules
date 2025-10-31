@@ -72,6 +72,10 @@ class Department(db.Model):
 
     doctors = db.relationship('Doctor', backref='department', lazy=True)
 
+    @property
+    def doctors_count(self):
+        return len(self.doctors)
+
 
 class DoctorAvailability(db.Model):
 

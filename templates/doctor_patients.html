@@ -59,10 +59,10 @@
                 <tbody>
                     {% for patient in patients %}
                     <tr>
-                        <td>{{ patient.user.username }}</td>
+                        <td>{{ patient.user.full_name }}</td>
                         <td>{{ patient.user.email }}</td>
-                        <td>{{ patient.phone or 'N/A' }}</td>
-                        <td>{{ patient.gender or 'N/A' }}</td>
+                        <td>{{ patient.user.phone or 'N/A' }}</td>
+                        <td>{{ patient.user.gender or 'N/A' }}</td>
                         <td>
                             <a href="{{ url_for('doctor_patient_history', patient_id=patient.id) }}" class="btn btn-sm btn-info" title="View Medical History">
                                 <i class="fas fa-history"></i> View History
