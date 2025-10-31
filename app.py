@@ -5,17 +5,13 @@ from backend.config import Config
 from backend.Sqldatabase import db
 from backend.models import *
 from backend.user_datastore import user_datastore
-from flask_security import Security, login_user, logout_user, current_user
-from flask_bcrypt import Bcrypt
+from flask_security import Security, login_user, logout_user, current_user, utils
 from datetime import datetime, date, timedelta
 import os
-
-bcrypt = Bcrypt()
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    bcrypt.init_app(app)
     db.init_app(app)
     Security(app, user_datastore)
     
@@ -39,12 +35,11 @@ def init_db(app):
         # Create admin user
         admin = user_datastore.find_user(username='admin')
         if not admin:
-            hash_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
             admin_user = user_datastore.create_user(
                 username='admin',
                 full_name='System Administrator',
                 email='admin@hospital.com',
-                password=hash_password,
+                password='admin123',
                 active=True,
                 roles=[admin_role],
                 fs_uniquifier=os.urandom(16).hex()
@@ -85,11 +80,6 @@ def get_user_role():
     return None
 
 
-def check_password(user, password):
-    """Check if password matches"""
-    return bcrypt.check_password_hash(user.password, password)
-
-
 # ==================== PUBLIC ROUTES ====================
 
 @app.route('/')
@@ -108,7 +98,7 @@ def login():
 
         user = user_datastore.find_user(username=username)
         
-        if user and check_password(user, password):
+        if user and utils.verify_password(password, user.password):
             # Check if user has the selected role
             user_roles = [r.name for r in user.roles]
             
@@ -173,9 +163,6 @@ def register():
             flash('Email already registered!', 'danger')
             return redirect(url_for('register'))
 
-        # Hash password
-        hash_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        
         # Get patient role
         patient_role = user_datastore.find_role('patient')
         
@@ -184,7 +171,7 @@ def register():
             username=username,
             full_name=full_name,
             email=email,
-            password=hash_password,
+            password=password,
             active=True,
             roles=[patient_role],
             phone=phone,
@@ -269,9 +256,6 @@ def admin_add_doctor():
             flash('Email already exists!', 'danger')
             return redirect(url_for('admin_add_doctor'))
 
-        # Hash password
-        hash_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        
         # Get doctor role
         doctor_role = user_datastore.find_role('doctor')
         
@@ -280,7 +264,7 @@ def admin_add_doctor():
             username=username,
             full_name=full_name,
             email=email,
-            password=hash_password,
+            password=password,
             active=True,
             roles=[doctor_role],
             phone=phone,
