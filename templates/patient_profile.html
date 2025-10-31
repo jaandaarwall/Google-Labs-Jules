@@ -48,11 +48,11 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="full_name" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ patient.full_name }}" required>
+                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ patient.user.username }}" required>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="email" class="form-label">Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" value="{{ patient.email }}" required>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ patient.user.email }}" required>
                 </div>
             </div>
             <div class="row">
@@ -62,7 +62,7 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="date_of_birth" class="form-label">Date of Birth</label>
-                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ patient.date_of_birth.strftime('%Y-%m-%d') if patient.date_of_birth }}">
+                    <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" value="{{ patient.user.date_of_birth.strftime('%Y-%m-%d') if patient.user.date_of_birth }}">
                 </div>
             </div>
             <div class="row">
@@ -76,7 +76,8 @@
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="blood_group" class="form-label">Blood Group</label>
-                    <input type="text" class="form-control" id="blood_group" name="blood_group" value="{{ patient.blood_group }}">
+                    <input type="text" class="form-control" id="blood_group" name="blood_group" value="{{ patient.user.blood_group
+ }}">
                 </div>
             </div>
             <div class="mb-3">

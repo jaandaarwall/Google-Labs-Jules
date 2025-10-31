@@ -50,7 +50,7 @@
             <div class="accordion-item">
                 <h2 class="accordion-header" id="heading-{{ appointment.id }}">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ appointment.id }}" aria-expanded="false" aria-controls="collapse-{{ appointment.id }}">
-                        <strong>{{ appointment.appointment_date.strftime('%d %b %Y') }}</strong> - Consultation with Dr. {{ appointment.doctor.full_name }} ({{ appointment.doctor.department.name }})
+                        <strong>{{ appointment.appointment_date.strftime('%d %b %Y') }}</strong> - Consultation with Dr. {{ appointment.doctor.user.username }} ({{ appointment.doctor.department.name }})
                     </button>
                 </h2>
                 <div id="collapse-{{ appointment.id }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ appointment.id }}" data-bs-parent="#medicalHistoryAccordion">

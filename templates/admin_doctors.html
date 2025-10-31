@@ -70,9 +70,9 @@
                             {% for doctor in doctors %}
                             <tr>
                                 <td>#{{ doctor.id }}</td>
-                                <td>Dr. {{ doctor.full_name }}</td>
-                                <td>{{ doctor.email }}</td>
-                                <td>{{ doctor.phone or 'N/A' }}</td>
+                                <td>Dr. {{ doctor.user.username }}</td>
+                                <td>{{ doctor.user.email }}</td>
+                                <td>{{ doctordoctor.user.phone.user.email or 'N/A' }}</td>
                                 <td><span class="badge bg-info">{{ doctor.department.name }}</span></td>
                                 <td>{{ doctor.experience_years }} years</td>
                                 <td>
