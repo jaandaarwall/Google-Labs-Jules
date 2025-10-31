@@ -139,14 +139,20 @@
                                 <i class="fas fa-user-circle"></i> {{ session.user_name }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Profile</a></li>
+                                {% if session.user_role == 'admin' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}"><i class="fas fa-user"></i> Profile</a></li>
+                                {% elif session.user_role == 'doctor' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('doctor_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+                                {% elif session.user_role == 'patient' %}
+                                    <li><a class="dropdown-item" href="{{ url_for('patient_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+                                {% endif %}
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('security.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                             </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
+                            <a class="nav-link" href="{{ url_for('security.login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Register</a>
