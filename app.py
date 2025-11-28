@@ -366,6 +366,77 @@ def admin_search():
 
     return render_template('admin_search.html', doctors=doctors, patients=patients, search_query=search_query)
 
+# ==================== DEPARTMENT MANAGEMENT ====================
+
+@app.route('/admin/departments')
+def admin_departments():
+    if session.get('user_role') != 'admin': return redirect(url_for('login'))
+    departments = Department.query.all()
+    return render_template('admin_departments.html', departments=departments)
+
+@app.route('/admin/department/add', methods=['GET', 'POST'])
+def admin_add_department():
+    if session.get('user_role') != 'admin': return redirect(url_for('login'))
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+        price = request.form.get('price')
+
+        if Department.query.filter_by(name=name).first():
+            flash('Department already exists!', 'danger')
+            return redirect(url_for('admin_add_department'))
+        
+        try:
+            new_dept = Department(
+                name=name, 
+                description=description, 
+                price=float(price) if price else 0.0
+            )
+            db.session.add(new_dept)
+            db.session.commit()
+            flash('Department added successfully!', 'success')
+            return redirect(url_for('admin_departments'))
+        except ValueError:
+            flash('Invalid price format.', 'danger')
+    
+    return render_template('admin_add_department.html')
+
+@app.route('/admin/department/edit/<int:id>', methods=['GET', 'POST'])
+def admin_edit_department(id):
+    if session.get('user_role') != 'admin': return redirect(url_for('login'))
+    department = Department.query.get_or_404(id)
+
+    if request.method == 'POST':
+        department.name = request.form.get('name')
+        department.description = request.form.get('description')
+        try:
+            department.price = float(request.form.get('price'))
+            db.session.commit()
+            flash('Department updated successfully!', 'success')
+            return redirect(url_for('admin_departments'))
+        except ValueError:
+            flash('Invalid price format.', 'danger')
+        except Exception as e:
+            db.session.rollback()
+            flash('Error updating department. Name might be duplicate.', 'danger')
+            
+    return render_template('admin_edit_department.html', department=department)
+
+@app.route('/admin/department/delete/<int:id>')
+def admin_delete_department(id):
+    if session.get('user_role') != 'admin': return redirect(url_for('login'))
+    department = Department.query.get_or_404(id)
+    
+    # Prevent deletion if doctors are assigned
+    if department.doctors:
+        flash(f'Cannot delete {department.name}. It has {len(department.doctors)} doctor(s) assigned. Please reassign or remove them first.', 'danger')
+        return redirect(url_for('admin_departments'))
+        
+    db.session.delete(department)
+    db.session.commit()
+    flash('Department deleted successfully!', 'success')
+    return redirect(url_for('admin_departments'))
+
 
 # ==================== PATIENT ROUTES ====================
 

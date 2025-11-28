@@ -105,7 +105,7 @@
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-warning w-100">
+                        <a href="{{ url_for('admin_departments') }}" class="btn btn-warning w-100">
                             <i class="fas fa-hospital"></i><br>Manage Departments
                         </a>
                     </div>
@@ -155,10 +155,15 @@
                                         <span class="badge bg-danger">{{ appointment.status }}</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <!-- <td>
                                     <button class="btn btn-sm btn-info">
                                         <i class="fas fa-eye"></i>
                                     </button>
+                                </td> -->
+                                <td>
+                                    <a href="{{ url_for('admin_view_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
