@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Make Payment - HMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <!-- Header -->
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-credit-card"></i> Payment</h4>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('patient_pay', appointment_id=appointment.id) }}">
+                        
+                        <!-- Payment Details Section -->
+                        <h6 class="text-muted mb-3">Payment Details</h6>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong>Payment ID:</strong>
+                                <span>#{{ payment.id }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <strong>Amount:</strong>
+                                <span class="text-success fw-bold">₹{{ "%.2f"|format(payment.amount) }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>Status:</strong>
+                                <span class="badge bg-warning text-dark">{{ payment.status }}</span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Card Details Section -->
+                        <h6 class="text-muted mb-3">Card Details</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Card Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
+                                <input type="text" class="form-control" placeholder="1234 5678 9012 3456" 
+                                       maxlength="19" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Expiry Date</label>
+                                <input type="text" class="form-control" placeholder="MM/YY" maxlength="5" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CVV</label>
+                                <input type="password" class="form-control" placeholder="123" maxlength="3" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Cardholder Name</label>
+                            <input type="text" class="form-control" placeholder="Name on card" required>
+                        </div>
+
+                        <div class="mb-4 form-check">
+                            <input type="checkbox" class="form-check-input" id="authCheck" required>
+                            <label class="form-check-label" for="authCheck">
+                                I authorize this payment of ₹{{ "%.2f"|format(payment.amount) }}
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                Pay ₹{{ "%.2f"|format(payment.amount) }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple formatter for card number spacing
+    const cardInput = document.querySelector('input[placeholder="1234 5678 9012 3456"]');
+    cardInput.addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+    });
+</script>
+{% endblock %}
