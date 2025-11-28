@@ -1,0 +1,31 @@
+<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'patient_dashboard' %}active{% endif %}" href="{{ url_for('patient_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'patient_find_doctors' %}active{% endif %}" href="{{ url_for('patient_find_doctors') }}">
+                    <i class="fas fa-search"></i> Find Doctors
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'patient_appointments' %}active{% endif %}" href="{{ url_for('patient_appointments') }}">
+                    <i class="fas fa-calendar-check"></i> My Appointments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'patient_medical_history' %}active{% endif %}" href="{{ url_for('patient_medical_history') }}">
+                    <i class="fas fa-notes-medical"></i> Medical History
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'patient_profile' %}active{% endif %}" href="{{ url_for('patient_profile') }}">
+                    <i class="fas fa-user"></i> My Profile
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

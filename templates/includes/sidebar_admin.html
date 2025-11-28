@@ -1,0 +1,31 @@
+<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'doctor' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_doctors') }}">
+                    <i class="fas fa-user-md"></i> Manage Doctors
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if 'patient' in request.endpoint and 'view' not in request.endpoint %}active{% endif %}" href="{{ url_for('admin_patients') }}">
+                    <i class="fas fa-users"></i> Manage Patients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin_appointments' %}active{% endif %}" href="{{ url_for('admin_appointments') }}">
+                    <i class="fas fa-calendar-alt"></i> All Appointments
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'admin_search' %}active{% endif %}" href="{{ url_for('admin_search') }}">
+                    <i class="fas fa-search"></i> Search
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>

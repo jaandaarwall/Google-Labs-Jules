@@ -3,37 +3,7 @@
 {% block title %}Doctor Dashboard - HMS{% endblock %}
 
 {% block sidebar %}
-<nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-    <div class="position-sticky pt-3">
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link active" href="{{ url_for('doctor_dashboard') }}">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('doctor_appointments') }}">
-                    <i class="fas fa-calendar-check"></i> My Appointments
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('doctor_patients') }}">
-                    <i class="fas fa-users"></i> My Patients
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('doctor_availability') }}">
-                    <i class="fas fa-clock"></i> Set Availability
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('doctor_profile') }}">
-                    <i class="fas fa-user"></i> My Profile
-                </a>
-            </li>
-        </ul>
-    </div>
-</nav>
+    {% include "includes/sidebar_doctor.html" %}
 {% endblock %}
 
 {% block content %}
