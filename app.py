@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify
 from models import db, User, Role, Doctor, Patient, Department, Appointment, Treatment, DoctorAvailability, Payment
 from datetime import datetime, date, timedelta
+from sqlalchemy import or_
 import os
 
 app = Flask(__name__)
@@ -28,7 +29,7 @@ class UserDatastore:
 user_datastore = UserDatastore()
 
 def init_database():
-    """Initialize database, create roles, and default admin with ALL profiles"""
+    """Initialize database, create roles, and ensure Admin has ALL profiles"""
     with app.app_context():
         db.create_all()
 
@@ -38,7 +39,7 @@ def init_database():
         doctor_role = user_datastore.find_or_create_role(name='doctor', description='Doctor')
         patient_role = user_datastore.find_or_create_role(name='patient', description='Patient')
 
-        # 2. Create Departments FIRST (needed for Doctor profile)
+        # 2. Create Departments FIRST
         if Department.query.count() == 0:
             departments = [
                 Department(name='Cardiology', description='Heart and cardiovascular system', price=1500.0),
@@ -52,8 +53,9 @@ def init_database():
                 db.session.add(dept)
             db.session.commit()
 
-        # 3. Create Admin User
+        # 3. Create or Update Admin User
         admin_user = User.query.filter_by(username='admin').first()
+        
         if not admin_user:
             print("   + Creating Admin User...")
             admin_user = User(
@@ -63,17 +65,21 @@ def init_database():
                 phone='0000000000'
             )
             admin_user.set_password('admin123')
-            
-            # Assign ALL roles
-            admin_user.roles.append(admin_role)
-            admin_user.roles.append(doctor_role)
-            admin_user.roles.append(patient_role)
-            
             db.session.add(admin_user)
-            db.session.flush() # Flush to get the ID
+            db.session.commit() # Commit to get ID
+        
+        # --- SELF-HEALING: Ensure Admin has all roles and profiles ---
+        
+        # Ensure Roles
+        if not admin_user.has_role('admin'): admin_user.roles.append(admin_role)
+        if not admin_user.has_role('doctor'): admin_user.roles.append(doctor_role)
+        if not admin_user.has_role('patient'): admin_user.roles.append(patient_role)
+        
+        db.session.commit()
 
-            # 4. Create Dummy Doctor Profile for Admin (Required to login as Doctor)
-            # Assign to the first available department
+        # Ensure Doctor Profile
+        if not Doctor.query.filter_by(user_id=admin_user.id).first():
+            print("   + Adding missing Doctor profile to Admin")
             first_dept = Department.query.first()
             admin_doctor = Doctor(
                 user_id=admin_user.id,
@@ -83,7 +89,9 @@ def init_database():
             )
             db.session.add(admin_doctor)
 
-            # 5. Create Dummy Patient Profile for Admin (Required to login as Patient)
+        # Ensure Patient Profile
+        if not Patient.query.filter_by(user_id=admin_user.id).first():
+            print("   + Adding missing Patient profile to Admin")
             admin_patient = Patient(
                 user_id=admin_user.id,
                 date_of_birth=date(1990, 1, 1),
@@ -93,11 +101,8 @@ def init_database():
             )
             db.session.add(admin_patient)
 
-            db.session.commit()
-            print("✅ Database initialized successfully!")
-            print("📝 Default Admin Credentials: admin / admin123")
-        else:
-            print("ℹ️  Database already initialized.")
+        db.session.commit()
+        print("✅ Database check complete.")
 
 
 @app.route('/')
@@ -108,13 +113,16 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Unified login page"""
+    """Unified login page with Username OR Email support"""
     if request.method == 'POST':
-        username = request.form.get('username')
+        login_input = request.form.get('username') # Contains username OR email
         password = request.form.get('password')
         requested_role = request.form.get('role')
 
-        user = User.query.filter_by(username=username).first()
+        # Allow login by Username OR Email
+        user = User.query.filter(
+            or_(User.username == login_input, User.email == login_input)
+        ).first()
 
         if user and user.check_password(password):
             if not user.is_active:
@@ -126,6 +134,15 @@ def login():
                 flash(f'Access denied. You do not have {requested_role} privileges.', 'danger')
                 return redirect(url_for('login'))
             
+            # Check if specific profile exists (prevents crashes)
+            if requested_role == 'doctor' and not Doctor.query.filter_by(user_id=user.id).first():
+                flash('Doctor profile not found. Please contact admin.', 'danger')
+                return redirect(url_for('login'))
+            
+            if requested_role == 'patient' and not Patient.query.filter_by(user_id=user.id).first():
+                flash('Patient profile not found. Please contact admin.', 'danger')
+                return redirect(url_for('login'))
+
             session['user_id'] = user.id 
             session['user_name'] = user.full_name
             session['user_role'] = requested_role
@@ -143,7 +160,7 @@ def login():
             return redirect(url_for('login'))
 
         else:
-            flash('Invalid credentials!', 'danger')
+            flash('Invalid credentials! Please check your username/email and password.', 'danger')
             return redirect(url_for('login'))
 
     return render_template('login.html')
@@ -250,22 +267,37 @@ def admin_add_doctor():
 
         new_user = User(username=username, email=email, full_name=full_name, phone=phone)
         new_user.set_password(password)
+        
+        # Assign Doctor Role
         doctor_role = Role.query.filter_by(name='doctor').first()
         if doctor_role: new_user.roles.append(doctor_role)
+
+        # Assign Patient Role (So doctor can login as patient too)
+        patient_role = Role.query.filter_by(name='patient').first()
+        if patient_role: new_user.roles.append(patient_role)
 
         db.session.add(new_user)
         db.session.flush()
 
+        # Create Doctor Profile
         new_doctor = Doctor(
             user_id=new_user.id,
             department_id=department_id,
             qualification=qualification,
             experience_years=int(experience_years) if experience_years else 0
         )
-
         db.session.add(new_doctor)
+
+        # Create Empty Patient Profile (Required for logging in as patient)
+        new_patient = Patient(
+            user_id=new_user.id,
+            address="N/A",
+            blood_group="N/A"
+        )
+        db.session.add(new_patient)
+
         db.session.commit()
-        flash(f'Doctor {full_name} added successfully!', 'success')
+        flash(f'Doctor {full_name} added successfully! (Also enabled as Patient)', 'success')
         return redirect(url_for('admin_doctors'))
     departments = Department.query.all()
     return render_template('admin_add_doctor.html', departments=departments)
@@ -446,8 +478,9 @@ def patient_dashboard():
     user_id = session.get('user_id')
     patient = Patient.query.filter_by(user_id=user_id).first()
     if not patient:
-        flash('Patient profile not found.', 'danger')
-        return redirect(url_for('login'))
+        flash('Patient profile not found. Please contact admin.', 'danger')
+        return redirect(url_for('logout'))
+        
     departments = Department.query.all()
     upcoming_appointments = Appointment.query.filter(
         Appointment.patient_id == patient.id,
@@ -500,6 +533,10 @@ def patient_book_appointment(doctor_id):
     
     user_id = session.get('user_id')
     patient = Patient.query.filter_by(user_id=user_id).first()
+    if not patient:
+        flash('Patient profile error.', 'danger')
+        return redirect(url_for('patient_dashboard'))
+
     doctor = Doctor.query.get_or_404(doctor_id)
     
     # Calculate Fee
@@ -835,4 +872,8 @@ def doctor_patient_history(patient_id):
 if __name__ == '__main__':
     if not os.path.exists('hospital.db'):
         init_database()
+    else:
+        # Run init anyway to check/fix roles
+        init_database()
+        
     app.run(debug=True, port=8000)
