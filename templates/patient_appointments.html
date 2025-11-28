@@ -48,12 +48,23 @@
                                         <span class="badge bg-primary">{{ appointment.status }}</span>
                                     {% elif appointment.status == 'Completed' %}
                                         <span class="badge bg-success">{{ appointment.status }}</span>
+                                    {% elif appointment.status == 'Pending Payment' %}
+                                        <span class="badge bg-warning text-dark">{{ appointment.status }}</span>
                                     {% else %}
                                         <span class="badge bg-danger">{{ appointment.status }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     {% if appointment.status == 'Booked' %}
+                                        <a href="{{ url_for('patient_cancel_appointment', appointment_id=appointment.id) }}" 
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </a>
+                                    {% elif appointment.status == 'Pending Payment' %}
+                                        <a href="{{ url_for('patient_pay', appointment_id=appointment.id) }}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-credit-card"></i> Pay Now
+                                        </a>
                                         <a href="{{ url_for('patient_cancel_appointment', appointment_id=appointment.id) }}" 
                                            class="btn btn-sm btn-danger"
                                            onclick="return confirm('Are you sure you want to cancel this appointment?')">

@@ -2,6 +2,7 @@ from flask import Flask, render_template, redirect, url_for, flash, request, ses
 from models import db, User, Role, Doctor, Patient, Department, Appointment, Treatment, DoctorAvailability, Payment
 from datetime import datetime, date, timedelta
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 import os
 
 app = Flask(__name__)
@@ -547,6 +548,23 @@ def patient_book_appointment(doctor_id):
         appointment_time = datetime.strptime(request.form.get('appointment_time'), '%H:%M').time()
         reason = request.form.get('reason')
         
+        # 1. Check if user already has a PENDING/BOOKED appointment for this slot (Prevents double booking via back button)
+        existing_appt = Appointment.query.filter_by(
+            patient_id=patient.id,
+            doctor_id=doctor_id,
+            appointment_date=appointment_date,
+            appointment_time=appointment_time
+        ).filter(Appointment.status != 'Cancelled').first()
+
+        if existing_appt:
+            if existing_appt.status == 'Pending Payment':
+                flash('You already have a pending booking for this slot. Redirecting to payment.', 'info')
+                return redirect(url_for('patient_pay', appointment_id=existing_appt.id))
+            elif existing_appt.status == 'Booked':
+                flash('You have already booked this appointment.', 'warning')
+                return redirect(url_for('patient_appointments'))
+
+        # 2. Check Availability
         availability = DoctorAvailability.query.filter(
             DoctorAvailability.doctor_id == doctor_id,
             DoctorAvailability.date == appointment_date,
@@ -561,35 +579,40 @@ def patient_book_appointment(doctor_id):
 
         booked_count = Appointment.query.filter_by(
             doctor_id=doctor_id, appointment_date=appointment_date, appointment_time=appointment_time
-        ).count()
+        ).filter(Appointment.status != 'Cancelled').count()
 
         if booked_count >= availability.total_seats:
-            flash('Fully booked.', 'danger')
+            flash('This slot is fully booked.', 'danger')
             return redirect(url_for('patient_book_appointment', doctor_id=doctor_id))
 
-        # 1. Create Appointment with 'Pending Payment' status
-        appointment = Appointment(
-            patient_id=patient.id,
-            doctor_id=doctor_id,
-            appointment_date=appointment_date,
-            appointment_time=appointment_time,
-            reason=reason,
-            status='Pending Payment'  # Changed status
-        )
-        db.session.add(appointment)
-        db.session.flush()
+        try:
+            # 3. Create Appointment with 'Pending Payment' status
+            appointment = Appointment(
+                patient_id=patient.id,
+                doctor_id=doctor_id,
+                appointment_date=appointment_date,
+                appointment_time=appointment_time,
+                reason=reason,
+                status='Pending Payment'
+            )
+            db.session.add(appointment)
+            db.session.flush()
 
-        # 2. Create Payment Record with 'Pending' status
-        payment = Payment(
-            appointment_id=appointment.id,
-            amount=consultation_fee,
-            status='Pending' # Changed status
-        )
-        db.session.add(payment)
-
-        db.session.commit()
-        # 3. Redirect to Payment Page
-        return redirect(url_for('patient_pay', appointment_id=appointment.id))
+            # 4. Create Payment Record
+            payment = Payment(
+                appointment_id=appointment.id,
+                amount=consultation_fee,
+                status='Pending'
+            )
+            db.session.add(payment)
+            db.session.commit()
+            
+            return redirect(url_for('patient_pay', appointment_id=appointment.id))
+            
+        except IntegrityError:
+            db.session.rollback()
+            flash('This time slot was just booked by someone else. Please choose another.', 'danger')
+            return redirect(url_for('patient_book_appointment', doctor_id=doctor_id))
 
     return render_template('patient_book_appointment.html', doctor=doctor, fee=consultation_fee)
 
@@ -609,6 +632,11 @@ def patient_pay(appointment_id):
     # Get the payment record for this appointment
     payment = Payment.query.filter_by(appointment_id=appointment.id).first()
     
+    # Check if already paid
+    if payment.status == 'Success':
+        flash('Payment already completed for this appointment.', 'info')
+        return redirect(url_for('patient_appointments'))
+    
     if request.method == 'POST':
         # Simulate payment processing
         payment.status = 'Success'
@@ -618,7 +646,7 @@ def patient_pay(appointment_id):
         db.session.commit()
         
         flash('Payment successful! Appointment confirmed.', 'success')
-        return redirect(url_for('patient_dashboard'))
+        return redirect(url_for('patient_appointments')) # Redirect to appointments page instead of dashboard
 
     return render_template('patient_payment.html', appointment=appointment, payment=payment)
 
