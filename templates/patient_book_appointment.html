@@ -46,11 +46,14 @@
                         <!-- Appointment Date -->
                         <div class="col-md-6 mb-3">
                             <label for="appointment_date" class="form-label">Appointment Date *</label>
-                            <input type="date" class="form-control" id="appointment_date" name="appointment_date" 
-                                   min="{{ (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d') }}"
-                                   max="{{ (datetime.now() + timedelta(days=7)).strftime('%Y-%m-%d') }}"
-                                   required>
-                            <small class="text-muted">Select a date within the next 7 days</small>
+                            <select class="form-select" id="appointment_date" name="appointment_date" required>
+                                <option value="">Select Available Date</option>
+                                {% for date in available_dates %}
+                                <option value="{{ date.strftime('%Y-%m-%d') }}">{{ date.strftime('%d %b %Y (%A)') }}</option>
+                                {% else %}
+                                <option value="" disabled>No available dates</option>
+                                {% endfor %}
+                            </select>
                         </div>
 
                         <!-- Appointment Time -->
@@ -120,15 +123,5 @@
                 }
             });
     });
-
-    // Set minimum date to tomorrow
-    const today = new Date();
-    today.setDate(today.getDate() + 1);
-    document.getElementById('appointment_date').min = today.toISOString().split('T')[0];
-    
-    // Set maximum date to 7 days from now
-    const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 30); // Allow booking up to 30 days in advance
-    document.getElementById('appointment_date').max = maxDate.toISOString().split('T')[0];
 </script>
 {% endblock %}

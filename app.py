@@ -522,7 +522,8 @@ def get_doctor_availability(doctor_id):
         while start_time < end_time:
             booked_count = Appointment.query.filter_by(
                 doctor_id=doctor_id, appointment_date=check_date, appointment_time=start_time.time()
-            ).count()
+            ).filter(Appointment.status != 'Cancelled').count() # Only count valid bookings
+            
             if booked_count < av.total_seats:
                 slots.append({'time': start_time.strftime('%H:%M')})
             start_time += timedelta(minutes=30)
@@ -542,6 +543,15 @@ def patient_book_appointment(doctor_id):
     
     # Calculate Fee
     consultation_fee = doctor.department.price if doctor.department else 500.0
+
+    # Get available dates for the dropdown
+    available_dates_query = DoctorAvailability.query.filter(
+        DoctorAvailability.doctor_id == doctor_id,
+        DoctorAvailability.date >= date.today(),
+        DoctorAvailability.is_available == True
+    ).with_entities(DoctorAvailability.date).distinct().order_by(DoctorAvailability.date).all()
+    
+    available_dates = [d.date for d in available_dates_query]
 
     if request.method == 'POST':
         appointment_date = datetime.strptime(request.form.get('appointment_date'), '%Y-%m-%d').date()
@@ -614,7 +624,7 @@ def patient_book_appointment(doctor_id):
             flash('This time slot was just booked by someone else. Please choose another.', 'danger')
             return redirect(url_for('patient_book_appointment', doctor_id=doctor_id))
 
-    return render_template('patient_book_appointment.html', doctor=doctor, fee=consultation_fee)
+    return render_template('patient_book_appointment.html', doctor=doctor, fee=consultation_fee, available_dates=available_dates)
 
 @app.route('/patient/pay/<int:appointment_id>', methods=['GET', 'POST'])
 def patient_pay(appointment_id):
