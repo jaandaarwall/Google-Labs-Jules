@@ -35,7 +35,7 @@
                                 <span class="fw-semibold">{{ session.user_name }}</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('common.change_password') }}"><i class="fas fa-key me-2"></i> Change Password</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="{{ url_for('common.logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                             </ul>
