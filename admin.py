@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
-from models import db, User, Role, Doctor, Patient, Department, Appointment
+from models import db, User, Role, Doctor, Patient, Department, Appointment, Payment
 from datetime import date
 from sqlalchemy import or_
 
@@ -9,6 +9,8 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 def check_admin():
     if session.get('user_role') != 'admin':
         return redirect(url_for('common.login'))
+
+# ... [Keep dashboard, doctors, add_doctor, edit_doctor routes same as before] ...
 
 @admin_bp.route('/dashboard')
 def admin_dashboard():
@@ -51,18 +53,14 @@ def admin_add_doctor():
         new_user = User(username=username, email=email, full_name=full_name, phone=phone)
         new_user.set_password(password)
         
-        # Assign Doctor Role
         doctor_role = Role.query.filter_by(name='doctor').first()
         if doctor_role: new_user.roles.append(doctor_role)
-
-        # Assign Patient Role (So doctor can login as patient too)
         patient_role = Role.query.filter_by(name='patient').first()
         if patient_role: new_user.roles.append(patient_role)
 
         db.session.add(new_user)
         db.session.flush()
 
-        # Create Doctor Profile
         new_doctor = Doctor(
             user_id=new_user.id,
             department_id=department_id,
@@ -70,17 +68,11 @@ def admin_add_doctor():
             experience_years=int(experience_years) if experience_years else 0
         )
         db.session.add(new_doctor)
-
-        # Create Empty Patient Profile (Required for logging in as patient)
-        new_patient = Patient(
-            user_id=new_user.id,
-            address="N/A",
-            blood_group="N/A"
-        )
+        new_patient = Patient(user_id=new_user.id, address="N/A", blood_group="N/A")
         db.session.add(new_patient)
 
         db.session.commit()
-        flash(f'Doctor {full_name} added successfully! (Also enabled as Patient)', 'success')
+        flash(f'Doctor {full_name} added successfully!', 'success')
         return redirect(url_for('admin.admin_doctors'))
     departments = Department.query.all()
     return render_template('admin_add_doctor.html', departments=departments)
@@ -94,7 +86,6 @@ def admin_edit_doctor(doctor_id):
         user.full_name = request.form.get('full_name')
         user.email = request.form.get('email')
         user.phone = request.form.get('phone')
-        
         doctor.department_id = request.form.get('department_id')
         doctor.qualification = request.form.get('qualification')
         doctor.experience_years = int(request.form.get('experience_years', 0))
@@ -106,14 +97,37 @@ def admin_edit_doctor(doctor_id):
     departments = Department.query.all()
     return render_template('admin_edit_doctor.html', doctor=doctor, departments=departments)
 
+# --- MODIFIED TOGGLE ROUTES ---
+
 @admin_bp.route('/doctor/toggle/<int:doctor_id>')
 def admin_toggle_doctor(doctor_id):
     doctor = Doctor.query.get_or_404(doctor_id)
-    doctor.user.is_active = not doctor.user.is_active 
-    db.session.commit()
+    new_status = not doctor.user.is_active
+    doctor.user.is_active = new_status
     
-    status = 'activated' if doctor.user.is_active else 'deactivated'
-    flash(f'Doctor {doctor.user.full_name} has been {status}!', 'success')
+    msg_extra = ""
+    if not new_status: # If deactivating
+        # Cancel all future appointments
+        future_appointments = Appointment.query.filter(
+            Appointment.doctor_id == doctor.id,
+            Appointment.appointment_date >= date.today(),
+            Appointment.status.in_(['Booked', 'Pending Payment'])
+        ).all()
+        
+        count = 0
+        for appt in future_appointments:
+            appt.status = 'Cancelled'
+            # Refund Payment
+            payment = Payment.query.filter_by(appointment_id=appt.id).first()
+            if payment and payment.status == 'Success':
+                payment.status = 'Refunded'
+            count += 1
+        
+        msg_extra = f" {count} future appointments cancelled and refunded."
+
+    db.session.commit()
+    status_str = 'activated' if new_status else 'deactivated'
+    flash(f'Doctor {doctor.user.full_name} has been {status_str}.{msg_extra}', 'success')
     return redirect(url_for('admin.admin_doctors'))
 
 @admin_bp.route('/patients')
@@ -124,12 +138,34 @@ def admin_patients():
 @admin_bp.route('/patient/toggle/<int:patient_id>')
 def admin_toggle_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
-    patient.user.is_active = not patient.user.is_active 
-    db.session.commit()
+    new_status = not patient.user.is_active
+    patient.user.is_active = new_status
     
-    status = 'activated' if patient.user.is_active else 'deactivated'
-    flash(f'Patient {patient.user.full_name} has been {status}!', 'success')
+    msg_extra = ""
+    if not new_status: # If deactivating
+        # Cancel all future appointments
+        future_appointments = Appointment.query.filter(
+            Appointment.patient_id == patient.id,
+            Appointment.appointment_date >= date.today(),
+            Appointment.status.in_(['Booked', 'Pending Payment'])
+        ).all()
+        
+        count = 0
+        for appt in future_appointments:
+            appt.status = 'Cancelled'
+            payment = Payment.query.filter_by(appointment_id=appt.id).first()
+            if payment and payment.status == 'Success':
+                payment.status = 'Refunded'
+            count += 1
+            
+        msg_extra = f" {count} future appointments cancelled and refunded."
+
+    db.session.commit()
+    status_str = 'activated' if new_status else 'deactivated'
+    flash(f'Patient {patient.user.full_name} has been {status_str}.{msg_extra}', 'success')
     return redirect(url_for('admin.admin_patients'))
+
+# ... [Keep remaining routes: view_patient, view_doctor, appointments, search, departments] ...
 
 @admin_bp.route('/patient/view/<int:patient_id>')
 def admin_view_patient(patient_id):
@@ -171,8 +207,6 @@ def admin_search():
 
     return render_template('admin_search.html', doctors=doctors, patients=patients, search_query=search_query)
 
-# ==================== DEPARTMENT MANAGEMENT ====================
-
 @admin_bp.route('/departments')
 def admin_departments():
     departments = Department.query.all()
@@ -190,11 +224,7 @@ def admin_add_department():
             return redirect(url_for('admin.admin_add_department'))
         
         try:
-            new_dept = Department(
-                name=name, 
-                description=description, 
-                price=float(price) if price else 0.0
-            )
+            new_dept = Department(name=name, description=description, price=float(price) if price else 0.0)
             db.session.add(new_dept)
             db.session.commit()
             flash('Department added successfully!', 'success')
@@ -220,19 +250,16 @@ def admin_edit_department(id):
             flash('Invalid price format.', 'danger')
         except Exception as e:
             db.session.rollback()
-            flash('Error updating department. Name might be duplicate.', 'danger')
+            flash('Error updating department.', 'danger')
             
     return render_template('admin_edit_department.html', department=department)
 
 @admin_bp.route('/department/delete/<int:id>')
 def admin_delete_department(id):
     department = Department.query.get_or_404(id)
-    
-    # Prevent deletion if doctors are assigned
     if department.doctors:
-        flash(f'Cannot delete {department.name}. It has {len(department.doctors)} doctor(s) assigned. Please reassign or remove them first.', 'danger')
+        flash(f'Cannot delete {department.name}. It has {len(department.doctors)} doctor(s) assigned.', 'danger')
         return redirect(url_for('admin.admin_departments'))
-        
     db.session.delete(department)
     db.session.commit()
     flash('Department deleted successfully!', 'success')

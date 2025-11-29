@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from models import db, Doctor, Patient, Appointment, Treatment, DoctorAvailability
 from datetime import datetime, date, timedelta
+import mail
 
 doctor_bp = Blueprint('doctor', __name__, url_prefix='/doctor')
 
@@ -18,8 +19,11 @@ def doctor_dashboard():
         return redirect(url_for('common.login'))
 
     today = date.today()
-    today_appointments = Appointment.query.filter_by(
-        doctor_id=doctor.id, appointment_date=today
+    # Exclude Pending Payment from dashboard stats
+    today_appointments = Appointment.query.filter(
+        Appointment.doctor_id == doctor.id, 
+        Appointment.appointment_date == today,
+        Appointment.status != 'Pending Payment'
     ).order_by(Appointment.appointment_time).all()
 
     week_later = today + timedelta(days=7)
@@ -43,7 +47,12 @@ def doctor_dashboard():
 def doctor_appointments():
     user_id = session.get('user_id')
     doctor = Doctor.query.filter_by(user_id=user_id).first()
-    appointments = Appointment.query.filter_by(doctor_id=doctor.id).order_by(Appointment.appointment_date.desc()).all()
+    # HIDE PENDING PAYMENTS
+    appointments = Appointment.query.filter(
+        Appointment.doctor_id == doctor.id,
+        Appointment.status != 'Pending Payment'
+    ).order_by(Appointment.appointment_date.desc()).all()
+    
     return render_template('doctor_appointments.html', appointments=appointments)
 
 @doctor_bp.route('/patients')
@@ -136,9 +145,11 @@ def doctor_add_treatment(appointment_id):
     user_id = session.get('user_id')
     doctor = Doctor.query.filter_by(user_id=user_id).first()
     appointment = Appointment.query.get_or_404(appointment_id)
+    
     if appointment.doctor_id != doctor.id:
         flash('Unauthorized!', 'danger')
         return redirect(url_for('doctor.doctor_dashboard'))
+        
     if request.method == 'POST':
         diagnosis = request.form.get('diagnosis')
         prescription = request.form.get('prescription')
@@ -146,12 +157,17 @@ def doctor_add_treatment(appointment_id):
         follow_up_required = 'follow_up_required' in request.form
         follow_up_date_str = request.form.get('follow_up_date')
         follow_up_date = None
+        
         if follow_up_required and follow_up_date_str:
             follow_up_date = datetime.strptime(follow_up_date_str, '%Y-%m-%d').date()
+            
         treatment = appointment.treatment
+        is_edit = True if treatment else False
+        
         if not treatment:
             treatment = Treatment(appointment_id=appointment.id)
             db.session.add(treatment)
+            
         treatment.diagnosis = diagnosis
         treatment.prescription = prescription
         treatment.notes = notes
@@ -159,8 +175,29 @@ def doctor_add_treatment(appointment_id):
         treatment.follow_up_date = follow_up_date
         appointment.status = 'Completed'
         db.session.commit()
-        flash('Treatment saved!', 'success')
+        
+        # Send Email Notification
+        try:
+            subject = f"Treatment Update - Dr. {doctor.user.full_name}"
+            action_text = "updated" if is_edit else "added"
+            body = f"""Dear {appointment.patient.user.full_name},
+            
+Your treatment details for the appointment on {appointment.appointment_date} have been {action_text}.
+Diagnosis: {diagnosis}
+Prescription: {prescription}
+
+Please log in to your portal to view full details.
+
+Regards,
+HMS Team
+            """
+            mail.send_email(appointment.patient.user.email, subject, body)
+            flash('Treatment saved and email notification sent!', 'success')
+        except Exception as e:
+            flash(f'Treatment saved, but email failed: {e}', 'warning')
+            
         return redirect(url_for('doctor.doctor_appointments'))
+        
     return render_template('doctor_add_treatment.html', appointment=appointment)
 
 @doctor_bp.route('/appointment/view/<int:appointment_id>')

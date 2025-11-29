@@ -2,7 +2,6 @@
 
 {% block title %}Add Treatment - HMS{% endblock %}
 
-
 {% block sidebar %}
     {% include "includes/sidebar_doctor.html" %}
 {% endblock %}
@@ -48,12 +47,13 @@
                     Follow-up Required?
                 </label>
             </div>
+            <!-- Ensure display logic matches initial checkbox state -->
             <div class="mb-3" id="follow-up-date-div" style="display: {% if appointment.treatment and appointment.treatment.follow_up_required %}block{% else %}none{% endif %};">
                 <label for="follow_up_date" class="form-label">Follow-up Date</label>
                 <input type="date" class="form-control" id="follow_up_date" name="follow_up_date" value="{{ appointment.treatment.follow_up_date.strftime('%Y-%m-%d') if appointment.treatment and appointment.treatment.follow_up_date }}">
             </div>
             <hr>
-            <p class="text-muted small">Saving this treatment will automatically mark the appointment as 'Completed'.</p>
+            <p class="text-muted small">Saving this treatment will automatically mark the appointment as 'Completed' and notify the patient via email.</p>
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Treatment</button>
             <a href="{{ url_for('doctor.doctor_appointments') }}" class="btn btn-secondary">Cancel</a>
         </form>
@@ -61,15 +61,23 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <script>
-document.getElementById('follow_up_required').addEventListener('change', function() {
-    var followUpDateDiv = document.getElementById('follow-up-date-div');
-    if (this.checked) {
-        followUpDateDiv.style.display = 'block';
-    } else {
-        followUpDateDiv.style.display = 'none';
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('follow_up_required');
+    const dateDiv = document.getElementById('follow-up-date-div');
+    
+    function toggleDate() {
+        if (checkbox.checked) {
+            dateDiv.style.display = 'block';
+        } else {
+            dateDiv.style.display = 'none';
+        }
     }
+
+    checkbox.addEventListener('change', toggleDate);
+    // Ensure correct state on load
+    toggleDate();
 });
 </script>
 {% endblock %}

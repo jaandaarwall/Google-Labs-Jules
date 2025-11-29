@@ -71,7 +71,7 @@
                                             <i class="fas fa-times"></i> Cancel
                                         </a>
                                     {% elif appointment.status == 'Completed' and appointment.treatment %}
-                                        <button class="btn btn-sm btn-info" 
+                                        <button type="button" class="btn btn-sm btn-info" 
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#treatmentModal{{ appointment.id }}">
                                             <i class="fas fa-file-medical"></i> View Details
@@ -79,38 +79,41 @@
                                     {% endif %}
                                 </td>
                             </tr>
-
-                            <!-- Treatment Details Modal -->
-                            {% if appointment.status == 'Completed' and appointment.treatment %}
-                            <div class="modal fade" id="treatmentModal{{ appointment.id }}" tabindex="-1">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Treatment Details - Appointment #{{ appointment.id }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <h6><strong>Doctor:</strong> Dr. {{ appointment.doctor.user.full_name }}</h6>
-                                            <h6><strong>Date:</strong> {{ appointment.appointment_date.strftime('%d %b %Y') }}</h6>
-                                            <hr>
-                                            <h6><strong>Diagnosis:</strong></h6>
-                                            <p>{{ appointment.treatment.diagnosis }}</p>
-                                            <h6><strong>Prescription:</strong></h6>
-                                            <p>{{ appointment.treatment.prescription or 'No prescription provided' }}</p>
-                                            <h6><strong>Notes:</strong></h6>
-                                            <p>{{ appointment.treatment.notes or 'No additional notes' }}</p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Modals Placed Outside Table to prevent Layout Shaking/Jitter -->
+                {% for appointment in appointments %}
+                    {% if appointment.status == 'Completed' and appointment.treatment %}
+                    <div class="modal fade" id="treatmentModal{{ appointment.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Treatment Details - Appointment #{{ appointment.id }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h6><strong>Doctor:</strong> Dr. {{ appointment.doctor.user.full_name }}</h6>
+                                    <h6><strong>Date:</strong> {{ appointment.appointment_date.strftime('%d %b %Y') }}</h6>
+                                    <hr>
+                                    <h6><strong>Diagnosis:</strong></h6>
+                                    <p>{{ appointment.treatment.diagnosis }}</p>
+                                    <h6><strong>Prescription:</strong></h6>
+                                    <p>{{ appointment.treatment.prescription or 'No prescription provided' }}</p>
+                                    <h6><strong>Notes:</strong></h6>
+                                    <p>{{ appointment.treatment.notes or 'No additional notes' }}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+
                 {% else %}
                 <div class="text-center py-5">
                     <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
