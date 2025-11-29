@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-{{ ui.page_header('Manage Departments', 'View and manage hospital departments', 'fa-building', 'Add Department', url_for('admin_add_department')) }}
+{{ ui.page_header('Manage Departments', 'View and manage hospital departments', 'fa-building', 'Add Department', url_for('admin.admin_add_department')) }}
 
 <div class="row">
     <div class="col-12">
@@ -40,11 +40,11 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('admin_edit_department', id=dept.id) }}" 
+                                    <a href="{{ url_for('admin.admin_edit_department', id=dept.id) }}" 
                                        class="btn btn-sm btn-outline-warning me-1" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="{{ url_for('admin_delete_department', id=dept.id) }}" 
+                                    <a href="{{ url_for('admin.admin_delete_department', id=dept.id) }}" 
                                        class="btn btn-sm btn-outline-danger" 
                                        title="Delete"
                                        onclick="return confirm('Are you sure you want to delete this department?')">
@@ -60,7 +60,7 @@
                 <div class="text-center py-5">
                     <i class="fas fa-hospital-alt fa-4x text-muted mb-3"></i>
                     <p class="text-muted">No departments found.</p>
-                    <a href="{{ url_for('admin_add_department') }}" class="btn btn-primary">Add First Department</a>
+                    <a href="{{ url_for('admin.admin_add_department') }}" class="btn btn-primary">Add First Department</a>
                 </div>
                 {% endif %}
             </div>

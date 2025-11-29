@@ -90,22 +90,22 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('admin_add_doctor') }}" class="btn btn-primary w-100">
+                        <a href="{{ url_for('admin.admin_add_doctor') }}" class="btn btn-primary w-100">
                             <i class="fas fa-user-plus"></i><br>Add New Doctor
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('admin_appointments') }}" class="btn btn-success w-100">
+                        <a href="{{ url_for('admin.admin_appointments') }}" class="btn btn-success w-100">
                             <i class="fas fa-calendar-plus"></i><br>View All Appointments
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('admin_search') }}" class="btn btn-info w-100">
+                        <a href="{{ url_for('admin.admin_search') }}" class="btn btn-info w-100">
                             <i class="fas fa-search"></i><br>Search Patients
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('admin_departments') }}" class="btn btn-warning w-100">
+                        <a href="{{ url_for('admin.admin_departments') }}" class="btn btn-warning w-100">
                             <i class="fas fa-hospital"></i><br>Manage Departments
                         </a>
                     </div>
@@ -161,7 +161,7 @@
                                     </button>
                                 </td> -->
                                 <td>
-                                    <a href="{{ url_for('admin_view_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-info" title="View Details">
+                                    <a href="{{ url_for('admin.admin_view_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-info" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>

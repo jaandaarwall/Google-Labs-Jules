@@ -2,32 +2,32 @@
     <div class="position-sticky pt-3">
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}" href="{{ url_for('admin_dashboard') }}">
+                <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}" href="{{ url_for('admin.admin_dashboard') }}">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if 'doctor' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_doctors') }}">
+                <a class="nav-link {% if 'doctor' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.admin_doctors') }}">
                     <i class="fas fa-user-md"></i> Manage Doctors
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if 'patient' in request.endpoint and 'view' not in request.endpoint %}active{% endif %}" href="{{ url_for('admin_patients') }}">
+                <a class="nav-link {% if 'patient' in request.endpoint and 'view' not in request.endpoint %}active{% endif %}" href="{{ url_for('admin.admin_patients') }}">
                     <i class="fas fa-users"></i> Manage Patients
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if 'department' in request.endpoint %}active{% endif %}" href="{{ url_for('admin_departments') }}">
+                <a class="nav-link {% if 'department' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.admin_departments') }}">
                     <i class="fas fa-building"></i> Departments
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'admin_appointments' %}active{% endif %}" href="{{ url_for('admin_appointments') }}">
+                <a class="nav-link {% if request.endpoint == 'admin_appointments' %}active{% endif %}" href="{{ url_for('admin.admin_appointments') }}">
                     <i class="fas fa-calendar-alt"></i> All Appointments
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if request.endpoint == 'admin_search' %}active{% endif %}" href="{{ url_for('admin_search') }}">
+                <a class="nav-link {% if request.endpoint == 'admin_search' %}active{% endif %}" href="{{ url_for('admin.admin_search') }}">
                     <i class="fas fa-search"></i> Search
                 </a>
             </li>

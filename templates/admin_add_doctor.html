@@ -18,7 +18,7 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-body p-4">
-                <form method="POST" action="{{ url_for('admin_add_doctor') }}">
+                <form method="POST" action="{{ url_for('admin.admin_add_doctor') }}">
                     <div class="row">
                         <!-- Full Name -->
                         <div class="col-md-6 mb-3">
@@ -83,7 +83,7 @@
 
                     <!-- Buttons -->
                     <div class="d-flex justify-content-between mt-4">
-                        <a href="{{ url_for('admin_doctors') }}" class="btn btn-secondary">
+                        <a href="{{ url_for('admin.admin_doctors') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back
                         </a>
                         <button type="submit" class="btn btn-primary">

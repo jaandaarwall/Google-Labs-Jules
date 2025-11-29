@@ -18,7 +18,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-white">
         <div class="container-fluid">
-            <a class="navbar-brand ps-3" href="{{ url_for('index') }}">
+            <a class="navbar-brand ps-3" href="{{ url_for('common.index') }}">
                 <i class="fas fa-heartbeat text-primary me-2"></i> HMS Portal
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -37,15 +37,15 @@
                             <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg">
                                 <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                                <li><a class="dropdown-item text-danger" href="{{ url_for('common.logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                             </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
+                            <a class="nav-link" href="{{ url_for('common.login') }}"><i class="fas fa-sign-in-alt me-1"></i> Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-primary text-white ms-2 px-4" href="{{ url_for('register') }}">Register</a>
+                            <a class="nav-link btn btn-primary text-white ms-2 px-4" href="{{ url_for('common.register') }}">Register</a>
                         </li>
                     {% endif %}
                 </ul>

@@ -34,7 +34,7 @@
                         <td>{{ patient.phone or 'N/A' }}</td>
                         <td>{{ patient.gender or 'N/A' }}</td>
                         <td>
-                            <a href="{{ url_for('doctor_patient_history', patient_id=patient.id) }}" class="btn btn-sm btn-info" title="View Medical History">
+                            <a href="{{ url_for('doctor.doctor_patient_history', patient_id=patient.id) }}" class="btn btn-sm btn-info" title="View Medical History">
                                 <i class="fas fa-history"></i> View History
                             </a>
                         </td>

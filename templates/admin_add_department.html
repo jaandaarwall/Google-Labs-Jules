@@ -14,7 +14,7 @@
     <div class="col-md-8 col-lg-6">
         <div class="card">
             <div class="card-body p-4">
-                <form method="POST" action="{{ url_for('admin_add_department') }}">
+                <form method="POST" action="{{ url_for('admin.admin_add_department') }}">
                     <div class="mb-3">
                         <label for="name" class="form-label">Department Name *</label>
                         <div class="input-group">
@@ -40,7 +40,7 @@
                     </div>
 
                     <div class="d-flex justify-content-between">
-                        <a href="{{ url_for('admin_departments') }}" class="btn btn-secondary">
+                        <a href="{{ url_for('admin.admin_departments') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Cancel
                         </a>
                         <button type="submit" class="btn btn-primary">

@@ -19,7 +19,7 @@
                 <h5>Add New Availability</h5>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('doctor_availability') }}">
+                <form method="POST" action="{{ url_for('doctor.doctor_availability') }}">
                     <div class="mb-3">
                         <label for="date" class="form-label">Date</label>
                         <input type="date" class="form-control" id="date" name="date" required>
@@ -67,7 +67,7 @@
                                 <td>{{ availability.end_time.strftime('%I:%M %p') }}</td>
                                 <td>{{ availability.total_seats }}</td>
                                 <td>
-                                    <a href="{{ url_for('doctor_delete_availability', availability_id=availability.id) }}"
+                                    <a href="{{ url_for('doctor.doctor_delete_availability', availability_id=availability.id) }}"
                                        class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">
                                         <i class="fas fa-trash"></i>
                                     </a>

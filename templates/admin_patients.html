@@ -55,10 +55,10 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('admin_view_patient', patient_id=patient.id) }}" class="btn btn-sm btn-info" title="View Details">
+                                    <a href="{{ url_for('admin.admin_view_patient', patient_id=patient.id) }}" class="btn btn-sm btn-info" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ url_for('admin_toggle_patient', patient_id=patient.id) }}" 
+                                    <a href="{{ url_for('admin.admin_toggle_patient', patient_id=patient.id) }}" 
                                        class="btn btn-sm {% if patient.is_active %}btn-danger{% else %}btn-success{% endif %}" 
                                        title="{% if patient.is_active %}Deactivate{% else %}Activate{% endif %}"
                                        onclick="return confirm('Are you sure?')">

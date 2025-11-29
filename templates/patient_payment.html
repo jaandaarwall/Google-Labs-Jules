@@ -13,7 +13,7 @@
                 </div>
                 
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ url_for('patient_pay', appointment_id=appointment.id) }}">
+                    <form method="POST" action="{{ url_for('patient.patient_pay', appointment_id=appointment.id) }}">
                         
                         <!-- Payment Details Section -->
                         <h6 class="text-muted mb-3">Payment Details</h6>

@@ -29,7 +29,7 @@
         <h5>Treatment Form</h5>
     </div>
     <div class="card-body">
-        <form method="POST" action="{{ url_for('doctor_add_treatment', appointment_id=appointment.id) }}">
+        <form method="POST" action="{{ url_for('doctor.doctor_add_treatment', appointment_id=appointment.id) }}">
             <div class="mb-3">
                 <label for="diagnosis" class="form-label">Diagnosis</label>
                 <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3" required>{{ appointment.treatment.diagnosis if appointment.treatment }}</textarea>
@@ -55,7 +55,7 @@
             <hr>
             <p class="text-muted small">Saving this treatment will automatically mark the appointment as 'Completed'.</p>
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Treatment</button>
-            <a href="{{ url_for('doctor_appointments') }}" class="btn btn-secondary">Cancel</a>
+            <a href="{{ url_for('doctor.doctor_appointments') }}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 </div>
