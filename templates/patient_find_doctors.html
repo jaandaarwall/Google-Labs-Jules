@@ -52,7 +52,7 @@
                     <div class="text-center mb-3">
                         <i class="fas fa-user-md fa-3x text-primary"></i>
                     </div>
-                    <h5 class="card-title text-center">Dr. {{ doctor.full_name }}</h5>
+                    <h5 class="card-title text-center">Dr. {{ doctor.user.full_name }}</h5>
                     <p class="text-center">
                         <span class="badge bg-info">{{ doctor.department.name }}</span>
                     </p>
@@ -64,7 +64,7 @@
                         <i class="fas fa-briefcase"></i> {{ doctor.experience_years }} years experience
                     </small></p>
                     <p class="mb-3"><small class="text-muted">
-                        <i class="fas fa-envelope"></i> {{ doctor.email }}
+                        <i class="fas fa-envelope"></i> {{ doctor.user.email }}
                     </small></p>
                     <div class="d-grid">
                         <a href="{{ url_for('patient.patient_book_appointment', doctor_id=doctor.id) }}" 

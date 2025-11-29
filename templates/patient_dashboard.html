@@ -9,7 +9,7 @@
 {% block content %}
 <div class="page-header">
     <h2 class="fw-bold"><i class="fas fa-user-injured"></i> Patient Dashboard</h2>
-    <p class="text-muted">Welcome back, {{ patient.full_name }}!</p>
+    <p class="text-muted">Welcome back, {{ patient.user.full_name }}!</p>
 </div>
 
 <!-- Patient Info Card -->
@@ -18,12 +18,12 @@
         <div class="card">
             <div class="card-body text-center">
                 <i class="fas fa-user-circle fa-5x text-primary mb-3"></i>
-                <h5 class="card-title">{{ patient.full_name }}</h5>
+                <h5 class="card-title">{{ patient.user.full_name }}</h5>
                 <p class="text-muted mb-2">
-                    <i class="fas fa-envelope"></i> {{ patient.email }}
+                    <i class="fas fa-envelope"></i> {{ patient.user.email }}
                 </p>
                 <p class="text-muted mb-2">
-                    <i class="fas fa-phone"></i> {{ patient.phone or 'Not provided' }}
+                    <i class="fas fa-phone"></i> {{ patient.user.phone or 'Not provided' }}
                 </p>
                 {% if patient.blood_group %}
                 <p class="text-muted mb-2">
@@ -154,7 +154,7 @@
                             {% for appointment in upcoming_appointments %}
                             <tr>
                                 <td>{{ appointment.appointment_date.strftime('%d %b %Y') }} at {{ appointment.appointment_time.strftime('%I:%M %p') }}</td>
-                                <td>Dr. {{ appointment.doctor.full_name }}</td>
+                                <td>Dr. {{ appointment.doctor.user.full_name }}</td>
                                 <td>{{ appointment.doctor.department.name }}</td>
                                 <td>
                                     <a href="{{ url_for('patient.patient_cancel_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-danger" title="Cancel" onclick="return confirm('Are you sure you want to cancel this appointment?')">
@@ -202,7 +202,7 @@
                             {% for appointment in past_appointments %}
                             <tr>
                                 <td>{{ appointment.appointment_date.strftime('%d %b %Y') }}</td>
-                                <td>Dr. {{ appointment.doctor.full_name }}</td>
+                                <td>Dr. {{ appointment.doctor.user.full_name }}</td>
                                 <td>
                                     {% if appointment.treatment %}
                                         {{ appointment.treatment.diagnosis|truncate(50) }}

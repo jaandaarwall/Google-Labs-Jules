@@ -41,13 +41,13 @@
                             {% for doctor in doctors %}
                             <tr>
                                 <td>#{{ doctor.id }}</td>
-                                <td>Dr. {{ doctor.full_name }}</td>
-                                <td>{{ doctor.email }}</td>
-                                <td>{{ doctor.phone or 'N/A' }}</td>
+                                <td>Dr. {{ doctor.user.full_name }}</td>
+                                <td>{{ doctor.user.email }}</td>
+                                <td>{{ doctor.user.phone or 'N/A' }}</td>
                                 <td><span class="badge bg-info">{{ doctor.department.name }}</span></td>
                                 <td>{{ doctor.experience_years }} years</td>
                                 <td>
-                                    {% if doctor.is_active %}
+                                    {% if doctor.user.is_active %}
                                         <span class="badge bg-success">Active</span>
                                     {% else %}
                                         <span class="badge bg-danger">Inactive</span>
@@ -59,10 +59,10 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <a href="{{ url_for('admin.admin_toggle_doctor', doctor_id=doctor.id) }}" 
-                                       class="btn btn-sm {% if doctor.is_active %}btn-danger{% else %}btn-success{% endif %}" 
-                                       title="{% if doctor.is_active %}Deactivate{% else %}Activate{% endif %}"
+                                       class="btn btn-sm {% if doctor.user.is_active %}btn-danger{% else %}btn-success{% endif %}" 
+                                       title="{% if doctor.user.is_active %}Deactivate{% else %}Activate{% endif %}"
                                        onclick="return confirm('Are you sure?')">
-                                        <i class="fas fa-{% if doctor.is_active %}ban{% else %}check{% endif %}"></i>
+                                        <i class="fas fa-{% if doctor.user.is_active %}ban{% else %}check{% endif %}"></i>
                                     </a>
                                      <a href="{{ url_for('admin.admin_view_doctor', doctor_id=doctor.id) }}"
                                        class="btn btn-sm btn-info" title="View Details">

@@ -50,10 +50,10 @@
                     <div class="list-group-item">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="mb-1">Dr. {{ doctor.full_name }}</h6>
+                                <h6 class="mb-1">Dr. {{ doctor.user.full_name }}</h6>
                                 <p class="mb-1 text-muted small">
-                                    <i class="fas fa-envelope"></i> {{ doctor.email }}<br>
-                                    <i class="fas fa-phone"></i> {{ doctor.phone or 'N/A' }}<br>
+                                    <i class="fas fa-envelope"></i> {{ doctor.user.email }}<br>
+                                    <i class="fas fa-phone"></i> {{ doctor.user.phone or 'N/A' }}<br>
                                     <span class="badge bg-info">{{ doctor.department.name }}</span>
                                 </p>
                             </div>
@@ -90,10 +90,10 @@
                     <div class="list-group-item">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="mb-1">{{ patient.full_name }}</h6>
+                                <h6 class="mb-1">{{ patient.user.full_name }}</h6>
                                 <p class="mb-1 text-muted small">
-                                    <i class="fas fa-envelope"></i> {{ patient.email }}<br>
-                                    <i class="fas fa-phone"></i> {{ patient.phone or 'N/A' }}<br>
+                                    <i class="fas fa-envelope"></i> {{ patient.user.email }}<br>
+                                    <i class="fas fa-phone"></i> {{ patient.user.phone or 'N/A' }}<br>
                                     {% if patient.blood_group %}
                                     <span class="badge bg-danger">{{ patient.blood_group }}</span>
                                     {% endif %}

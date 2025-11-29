@@ -49,7 +49,7 @@ class Department(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     description = db.Column(db.Text)
-    price = db.Column(db.Float, default=500.0) # Added price field from your previous context
+    price = db.Column(db.Float, default=500.0) 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationship
@@ -71,8 +71,6 @@ class Doctor(db.Model):
     # Relationships
     appointments = db.relationship('Appointment', backref='doctor', lazy=True)
     availability = db.relationship('DoctorAvailability', backref='doctor', lazy=True, cascade='all, delete-orphan')
-    
-    # No @property methods here anymore. Access via .user (e.g., doctor.user.full_name)
 
 class Patient(db.Model):
     __tablename__ = 'patient'
@@ -86,8 +84,6 @@ class Patient(db.Model):
     
     # Relationships
     appointments = db.relationship('Appointment', backref='patient', lazy=True)
-
-    # No @property methods here anymore. Access via .user (e.g., patient.user.full_name)
 
 class DoctorAvailability(db.Model):
     __tablename__ = 'doctor_availability'

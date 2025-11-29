@@ -36,9 +36,9 @@
                             {% for patient in patients %}
                             <tr>
                                 <td>#{{ patient.id }}</td>
-                                <td>{{ patient.full_name }}</td>
-                                <td>{{ patient.email }}</td>
-                                <td>{{ patient.phone or 'N/A' }}</td>
+                                <td>{{ patient.user.full_name }}</td>
+                                <td>{{ patient.user.email }}</td>
+                                <td>{{ patient.user.phone or 'N/A' }}</td>
                                 <td>
                                     {% if patient.blood_group %}
                                         <span class="badge bg-danger">{{ patient.blood_group }}</span>
@@ -48,7 +48,7 @@
                                 </td>
                                 <td>{{ patient.gender or 'N/A' }}</td>
                                 <td>
-                                    {% if patient.is_active %}
+                                    {% if patient.user.is_active %}
                                         <span class="badge bg-success">Active</span>
                                     {% else %}
                                         <span class="badge bg-danger">Inactive</span>
@@ -59,10 +59,10 @@
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="{{ url_for('admin.admin_toggle_patient', patient_id=patient.id) }}" 
-                                       class="btn btn-sm {% if patient.is_active %}btn-danger{% else %}btn-success{% endif %}" 
-                                       title="{% if patient.is_active %}Deactivate{% else %}Activate{% endif %}"
+                                       class="btn btn-sm {% if patient.user.is_active %}btn-danger{% else %}btn-success{% endif %}" 
+                                       title="{% if patient.user.is_active %}Deactivate{% else %}Activate{% endif %}"
                                        onclick="return confirm('Are you sure?')">
-                                        <i class="fas fa-{% if patient.is_active %}ban{% else %}check{% endif %}"></i>
+                                        <i class="fas fa-{% if patient.user.is_active %}ban{% else %}check{% endif %}"></i>
                                     </a>
                                 </td>
                             </tr>

@@ -23,13 +23,13 @@
                         <div class="col-md-6 mb-3">
                             <label for="full_name" class="form-label">Full Name *</label>
                             <input type="text" class="form-control" id="full_name" name="full_name" 
-                                   value="{{ doctor.full_name }}" required>
+                                   value="{{ doctor.user.full_name }}" required>
                         </div>
 
                         <!-- Username (Read-only) -->
                         <div class="col-md-6 mb-3">
                             <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" value="{{ doctor.username }}" readonly disabled>
+                            <input type="text" class="form-control" value="{{ doctor.user.username }}" readonly disabled>
                             <small class="text-muted">Username cannot be changed</small>
                         </div>
 
@@ -37,14 +37,14 @@
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">Email *</label>
                             <input type="email" class="form-control" id="email" name="email" 
-                                   value="{{ doctor.email }}" required>
+                                   value="{{ doctor.user.email }}" required>
                         </div>
 
                         <!-- Phone -->
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="tel" class="form-control" id="phone" name="phone" 
-                                   value="{{ doctor.phone or '' }}" pattern="[0-9]{10}">
+                                   value="{{ doctor.user.phone or '' }}" pattern="[0-9]{10}">
                         </div>
 
                         <!-- Department/Specialization -->
