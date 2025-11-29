@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Appointment Details - HMS{% endblock %}
+
+{% block sidebar %}
+    {% include "includes/sidebar_patient.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="fw-bold"><i class="fas fa-file-medical"></i> Appointment Details</h2>
+        <p class="text-muted">Details for appointment #{{ appointment.id }}</p>
+    </div>
+    <a href="{{ url_for('patient.patient_appointments') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Appointments
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <!-- Header with Doctor and Date info -->
+    <div class="card-header bg-white py-3">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="mb-1 text-muted text-uppercase small fw-bold">Doctor</p>
+                <h5 class="fw-bold text-primary mb-0">Dr. {{ appointment.doctor.user.full_name }}</h5>
+                <p class="text-muted small mb-0">{{ appointment.doctor.department.name }}</p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <p class="mb-1 text-muted text-uppercase small fw-bold">Date & Time</p>
+                <h5 class="fw-bold mb-0">{{ appointment.appointment_date.strftime('%d %b %Y') }}</h5>
+                <p class="text-muted small mb-0">{{ appointment.appointment_time.strftime('%I:%M %p') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-4">
+        {% if appointment.treatment %}
+            <!-- Diagnosis Section -->
+            <div class="mb-4">
+                <h6 class="fw-bold text-secondary text-uppercase small mb-2"><i class="fas fa-stethoscope me-2"></i>Diagnosis</h6>
+                <div class="p-3 bg-light rounded border-start border-4 border-primary">
+                    {{ appointment.treatment.diagnosis }}
+                </div>
+            </div>
+
+            <!-- Prescription Section -->
+            <div class="mb-4">
+                <h6 class="fw-bold text-secondary text-uppercase small mb-2"><i class="fas fa-prescription me-2"></i>Prescription</h6>
+                <div class="p-3 bg-light rounded border-start border-4 border-success">
+                    <pre class="mb-0" style="font-family: inherit; white-space: pre-wrap;">{{ appointment.treatment.prescription or 'No prescription provided.' }}</pre>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            {% if appointment.treatment.notes %}
+            <div class="mb-4">
+                <h6 class="fw-bold text-secondary text-uppercase small mb-2"><i class="fas fa-sticky-note me-2"></i>Doctor's Notes</h6>
+                <div class="p-3 bg-light rounded">
+                    {{ appointment.treatment.notes }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Follow-up Alert -->
+            {% if appointment.treatment.follow_up_required %}
+            <div class="alert alert-info d-flex align-items-center mt-4" role="alert">
+                <i class="fas fa-calendar-plus fa-2x me-3"></i>
+                <div>
+                    <h6 class="fw-bold mb-1">Follow-up Required</h6>
+                    <p class="mb-0">
+                        Please schedule a follow-up appointment on or around 
+                        <strong>{{ appointment.treatment.follow_up_date.strftime('%d %b %Y') if appointment.treatment.follow_up_date else 'Scheduled Date' }}</strong>.
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+            <!-- Fallback if status is Completed but no treatment entered yet -->
+            <div class="text-center py-5">
+                <i class="fas fa-file-medical-alt fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Treatment details have not been entered for this appointment yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

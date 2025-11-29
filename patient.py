@@ -224,6 +224,21 @@ def patient_cancel_appointment(appointment_id):
         flash('Cannot cancel this appointment.', 'danger')
     return redirect(url_for('patient.patient_appointments'))
 
+# NEW ROUTE: View Appointment Details
+@patient_bp.route('/patient/appointment/view/<int:appointment_id>')
+def patient_view_appointment(appointment_id):
+    user_id = session.get('user_id')
+    patient = Patient.query.filter_by(user_id=user_id).first()
+    appointment = Appointment.query.get_or_404(appointment_id)
+
+    # Security: Ensure appointment belongs to this patient
+    if appointment.patient_id != patient.id:
+        flash('Unauthorized access!', 'danger')
+        return redirect(url_for('patient.patient_appointments'))
+
+    return render_template('patient_view_appointment.html', appointment=appointment)
+
+
 @patient_bp.route('/patient/history')
 def patient_medical_history():
     user_id = session.get('user_id')
