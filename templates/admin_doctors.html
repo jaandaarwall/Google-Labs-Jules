@@ -58,12 +58,16 @@
                                        class="btn btn-sm btn-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    
+                                    {% if doctor.user.username != 'admin' %}
                                     <a href="{{ url_for('admin.admin_toggle_doctor', doctor_id=doctor.id) }}" 
                                        class="btn btn-sm {% if doctor.user.is_active %}btn-danger{% else %}btn-success{% endif %}" 
                                        title="{% if doctor.user.is_active %}Deactivate{% else %}Activate{% endif %}"
                                        onclick="return confirm('Are you sure?')">
                                         <i class="fas fa-{% if doctor.user.is_active %}ban{% else %}check{% endif %}"></i>
                                     </a>
+                                    {% endif %}
+                                    
                                      <a href="{{ url_for('admin.admin_view_doctor', doctor_id=doctor.id) }}"
                                        class="btn btn-sm btn-info" title="View Details">
                                         <i class="fas fa-eye"></i>

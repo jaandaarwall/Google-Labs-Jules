@@ -58,12 +58,15 @@
                                     <a href="{{ url_for('admin.admin_view_patient', patient_id=patient.id) }}" class="btn btn-sm btn-info" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    
+                                    {% if patient.user.username != 'admin' %}
                                     <a href="{{ url_for('admin.admin_toggle_patient', patient_id=patient.id) }}" 
                                        class="btn btn-sm {% if patient.user.is_active %}btn-danger{% else %}btn-success{% endif %}" 
                                        title="{% if patient.user.is_active %}Deactivate{% else %}Activate{% endif %}"
                                        onclick="return confirm('Are you sure?')">
                                         <i class="fas fa-{% if patient.user.is_active %}ban{% else %}check{% endif %}"></i>
                                     </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

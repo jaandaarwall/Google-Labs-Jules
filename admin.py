@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from models import db, User, Role, Doctor, Patient, Department, Appointment, Payment
 from datetime import date
 from sqlalchemy import or_
+import mail  # Importing the mail module
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -9,8 +10,6 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 def check_admin():
     if session.get('user_role') != 'admin':
         return redirect(url_for('common.login'))
-
-# ... [Keep dashboard, doctors, add_doctor, edit_doctor routes same as before] ...
 
 @admin_bp.route('/dashboard')
 def admin_dashboard():
@@ -97,11 +96,15 @@ def admin_edit_doctor(doctor_id):
     departments = Department.query.all()
     return render_template('admin_edit_doctor.html', doctor=doctor, departments=departments)
 
-# --- MODIFIED TOGGLE ROUTES ---
-
 @admin_bp.route('/doctor/toggle/<int:doctor_id>')
 def admin_toggle_doctor(doctor_id):
     doctor = Doctor.query.get_or_404(doctor_id)
+    
+    # Prevent deactivation of the main admin account
+    if doctor.user.username == 'admin':
+        flash('Cannot deactivate the system administrator account.', 'danger')
+        return redirect(url_for('admin.admin_doctors'))
+
     new_status = not doctor.user.is_active
     doctor.user.is_active = new_status
     
@@ -121,9 +124,28 @@ def admin_toggle_doctor(doctor_id):
             payment = Payment.query.filter_by(appointment_id=appt.id).first()
             if payment and payment.status == 'Success':
                 payment.status = 'Refunded'
+            
+            # Send Email Notification to Patient
+            try:
+                subject = "Important: Appointment Cancelled"
+                body = f"""Dear {appt.patient.user.full_name},
+
+We regret to inform you that your appointment with Dr. {doctor.user.full_name} on {appt.appointment_date} at {appt.appointment_time} has been cancelled due to the doctor being unavailable.
+
+Any payments made for this appointment have been processed for a refund.
+
+We apologize for the inconvenience.
+
+Regards,
+HMS Administration
+"""
+                mail.send_email(appt.patient.user.email, subject, body)
+            except Exception as e:
+                print(f"Failed to send cancellation email to {appt.patient.user.email}: {e}")
+
             count += 1
         
-        msg_extra = f" {count} future appointments cancelled and refunded."
+        msg_extra = f" {count} future appointments cancelled, patients notified, and payments refunded."
 
     db.session.commit()
     status_str = 'activated' if new_status else 'deactivated'
@@ -138,6 +160,12 @@ def admin_patients():
 @admin_bp.route('/patient/toggle/<int:patient_id>')
 def admin_toggle_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
+
+    # Prevent deactivation of the main admin account
+    if patient.user.username == 'admin':
+        flash('Cannot deactivate the system administrator account.', 'danger')
+        return redirect(url_for('admin.admin_patients'))
+
     new_status = not patient.user.is_active
     patient.user.is_active = new_status
     
@@ -164,8 +192,6 @@ def admin_toggle_patient(patient_id):
     status_str = 'activated' if new_status else 'deactivated'
     flash(f'Patient {patient.user.full_name} has been {status_str}.{msg_extra}', 'success')
     return redirect(url_for('admin.admin_patients'))
-
-# ... [Keep remaining routes: view_patient, view_doctor, appointments, search, departments] ...
 
 @admin_bp.route('/patient/view/<int:patient_id>')
 def admin_view_patient(patient_id):
