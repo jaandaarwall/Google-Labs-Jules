@@ -29,11 +29,19 @@ body {
     color: var(--primary-color) !important;
 }
 
+/* Updated Sidebar Styling for Responsiveness */
 .sidebar {
-    min-height: calc(100vh - 70px);
     background: white;
     box-shadow: 2px 0 10px rgba(0,0,0,0.05);
     z-index: 100;
+    /* Default for mobile: Auto height so it stacks */
+}
+
+/* Desktop Sidebar behavior */
+@media (min-width: 768px) {
+    .sidebar {
+        min-height: calc(100vh - 70px);
+    }
 }
 
 .sidebar .nav-link {
