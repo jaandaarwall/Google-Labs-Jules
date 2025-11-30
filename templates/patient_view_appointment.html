@@ -18,7 +18,6 @@
 </div>
 
 <div class="card shadow-sm">
-    <!-- Header with Doctor and Date info -->
     <div class="card-header bg-white py-3">
         <div class="row align-items-center">
             <div class="col-md-6">
@@ -36,7 +35,6 @@
 
     <div class="card-body p-4">
         {% if appointment.treatment %}
-            <!-- Diagnosis Section -->
             <div class="mb-4">
                 <h6 class="fw-bold text-secondary text-uppercase small mb-2"><i class="fas fa-stethoscope me-2"></i>Diagnosis</h6>
                 <div class="p-3 bg-light rounded border-start border-4 border-primary">
@@ -44,7 +42,6 @@
                 </div>
             </div>
 
-            <!-- Prescription Section -->
             <div class="mb-4">
                 <h6 class="fw-bold text-secondary text-uppercase small mb-2"><i class="fas fa-prescription me-2"></i>Prescription</h6>
                 <div class="p-3 bg-light rounded border-start border-4 border-success">
@@ -52,7 +49,6 @@
                 </div>
             </div>
 
-            <!-- Notes Section -->
             {% if appointment.treatment.notes %}
             <div class="mb-4">
                 <h6 class="fw-bold text-secondary text-uppercase small mb-2"><i class="fas fa-sticky-note me-2"></i>Doctor's Notes</h6>
@@ -62,7 +58,6 @@
             </div>
             {% endif %}
 
-            <!-- Follow-up Alert -->
             {% if appointment.treatment.follow_up_required %}
             <div class="alert alert-info d-flex align-items-center mt-4" role="alert">
                 <i class="fas fa-calendar-plus fa-2x me-3"></i>
@@ -76,7 +71,6 @@
             </div>
             {% endif %}
         {% else %}
-            <!-- Fallback if status is Completed but no treatment entered yet -->
             <div class="text-center py-5">
                 <i class="fas fa-file-medical-alt fa-3x text-muted mb-3"></i>
                 <p class="text-muted">Treatment details have not been entered for this appointment yet.</p>

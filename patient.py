@@ -7,11 +7,7 @@ patient_bp = Blueprint('patient', __name__)
 
 @patient_bp.before_request
 def check_patient():
-    # Allow API route without standard redirect (optional logic can be added if needed), 
-    # but generally patient API requires login
     if request.path.startswith('/api'):
-        # Just return/pass if session check fails? 
-        # For simplicity, we keep same session check
         pass
     
     if session.get('user_role') != 'patient' and not request.path.startswith('/api'):
@@ -64,7 +60,7 @@ def get_doctor_availability(doctor_id):
         while start_time < end_time:
             booked_count = Appointment.query.filter_by(
                 doctor_id=doctor_id, appointment_date=check_date, appointment_time=start_time.time()
-            ).filter(Appointment.status != 'Cancelled').count() # Only count valid bookings
+            ).filter(Appointment.status != 'Cancelled').count() 
             
             if booked_count < av.total_seats:
                 slots.append({'time': start_time.strftime('%H:%M')})
@@ -81,10 +77,8 @@ def patient_book_appointment(doctor_id):
 
     doctor = Doctor.query.get_or_404(doctor_id)
     
-    # Calculate Fee
     consultation_fee = doctor.department.price if doctor.department else 500.0
 
-    # Get available dates for the dropdown
     available_dates_query = DoctorAvailability.query.filter(
         DoctorAvailability.doctor_id == doctor_id,
         DoctorAvailability.date >= date.today(),
@@ -98,7 +92,6 @@ def patient_book_appointment(doctor_id):
         appointment_time = datetime.strptime(request.form.get('appointment_time'), '%H:%M').time()
         reason = request.form.get('reason')
         
-        # 1. Check if user already has a PENDING/BOOKED appointment for this slot (Prevents double booking via back button)
         existing_appt = Appointment.query.filter_by(
             patient_id=patient.id,
             doctor_id=doctor_id,
@@ -114,7 +107,6 @@ def patient_book_appointment(doctor_id):
                 flash('You have already booked this appointment.', 'warning')
                 return redirect(url_for('patient.patient_appointments'))
 
-        # 2. Check Availability
         availability = DoctorAvailability.query.filter(
             DoctorAvailability.doctor_id == doctor_id,
             DoctorAvailability.date == appointment_date,
@@ -136,7 +128,6 @@ def patient_book_appointment(doctor_id):
             return redirect(url_for('patient.patient_book_appointment', doctor_id=doctor_id))
 
         try:
-            # 3. Create Appointment with 'Pending Payment' status
             appointment = Appointment(
                 patient_id=patient.id,
                 doctor_id=doctor_id,
@@ -170,14 +161,12 @@ def patient_book_appointment(doctor_id):
 def patient_pay(appointment_id):
     appointment = Appointment.query.get_or_404(appointment_id)
     
-    # Security check: Ensure appointment belongs to current user
     user_id = session.get('user_id')
     patient = Patient.query.filter_by(user_id=user_id).first()
     if appointment.patient_id != patient.id:
         flash('Unauthorized access to this payment.', 'danger')
         return redirect(url_for('patient.patient_dashboard'))
 
-    # Get the payment record for this appointment
     payment = Payment.query.filter_by(appointment_id=appointment.id).first()
     
     # Check if already paid
@@ -186,15 +175,14 @@ def patient_pay(appointment_id):
         return redirect(url_for('patient.patient_appointments'))
     
     if request.method == 'POST':
-        # Simulate payment processing
         payment.status = 'Success'
         payment.payment_date = datetime.utcnow()
-        appointment.status = 'Booked' # Update appointment status to Booked
+        appointment.status = 'Booked' 
         
         db.session.commit()
         
         flash('Payment successful! Appointment confirmed.', 'success')
-        return redirect(url_for('patient.patient_appointments')) # Redirect to appointments page instead of dashboard
+        return redirect(url_for('patient.patient_appointments')) 
 
     return render_template('patient_payment.html', appointment=appointment, payment=payment)
 
@@ -224,14 +212,12 @@ def patient_cancel_appointment(appointment_id):
         flash('Cannot cancel this appointment.', 'danger')
     return redirect(url_for('patient.patient_appointments'))
 
-# NEW ROUTE: View Appointment Details
 @patient_bp.route('/patient/appointment/view/<int:appointment_id>')
 def patient_view_appointment(appointment_id):
     user_id = session.get('user_id')
     patient = Patient.query.filter_by(user_id=user_id).first()
     appointment = Appointment.query.get_or_404(appointment_id)
 
-    # Security: Ensure appointment belongs to this patient
     if appointment.patient_id != patient.id:
         flash('Unauthorized access!', 'danger')
         return redirect(url_for('patient.patient_appointments'))

@@ -7,7 +7,6 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow-sm">
-                <!-- Header -->
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0"><i class="fas fa-credit-card"></i> Payment</h4>
                 </div>
@@ -15,7 +14,6 @@
                 <div class="card-body p-4">
                     <form method="POST" action="{{ url_for('patient.patient_pay', appointment_id=appointment.id) }}">
                         
-                        <!-- Payment Details Section -->
                         <h6 class="text-muted mb-3">Payment Details</h6>
                         <div class="mb-4">
                             <div class="d-flex justify-content-between mb-2">
@@ -34,7 +32,6 @@
 
                         <hr class="my-4">
 
-                        <!-- Card Details Section -->
                         <h6 class="text-muted mb-3">Card Details</h6>
                         
                         <div class="mb-3">
@@ -69,7 +66,6 @@
                             </label>
                         </div>
 
-                        <!-- Submit Button -->
                         <div class="d-grid">
                             <button type="submit" class="btn btn-success btn-lg">
                                 Pay ₹{{ "%.2f"|format(payment.amount) }}
@@ -83,7 +79,6 @@
 </div>
 
 <script>
-    // Simple formatter for card number spacing
     const cardInput = document.querySelector('input[placeholder="1234 5678 9012 3456"]');
     cardInput.addEventListener('input', function (e) {
         e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();

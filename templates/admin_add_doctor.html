@@ -20,42 +20,36 @@
             <div class="card-body p-4">
                 <form method="POST" action="{{ url_for('admin.admin_add_doctor') }}">
                     <div class="row">
-                        <!-- Full Name -->
                         <div class="col-md-6 mb-3">
                             <label for="full_name" class="form-label">Full Name *</label>
                             <input type="text" class="form-control" id="full_name" name="full_name" 
                                    placeholder="Dr. John Doe" required>
                         </div>
 
-                        <!-- Username -->
                         <div class="col-md-6 mb-3">
                             <label for="username" class="form-label">Username *</label>
                             <input type="text" class="form-control" id="username" name="username" 
                                    placeholder="johndoe" required minlength="3">
                         </div>
 
-                        <!-- Email -->
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">Email *</label>
                             <input type="email" class="form-control" id="email" name="email" 
                                    placeholder="john.doe@hospital.com" required>
                         </div>
 
-                        <!-- Phone -->
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="tel" class="form-control" id="phone" name="phone" 
                                    placeholder="10-digit number" pattern="[0-9]{10}">
                         </div>
 
-                        <!-- Password -->
                         <div class="col-md-6 mb-3">
                             <label for="password" class="form-label">Password *</label>
                             <input type="password" class="form-control" id="password" name="password" 
                                    placeholder="Create a password" required minlength="6">
                         </div>
 
-                        <!-- Department/Specialization -->
                         <div class="col-md-6 mb-3">
                             <label for="department_id" class="form-label">Specialization *</label>
                             <select class="form-select" id="department_id" name="department_id" required>
@@ -66,14 +60,12 @@
                             </select>
                         </div>
 
-                        <!-- Qualification -->
                         <div class="col-md-6 mb-3">
                             <label for="qualification" class="form-label">Qualification</label>
                             <input type="text" class="form-control" id="qualification" name="qualification" 
                                    placeholder="MBBS, MD, etc.">
                         </div>
 
-                        <!-- Experience Years -->
                         <div class="col-md-6 mb-3">
                             <label for="experience_years" class="form-label">Years of Experience</label>
                             <input type="number" class="form-control" id="experience_years" name="experience_years" 
@@ -81,7 +73,6 @@
                         </div>
                     </div>
 
-                    <!-- Buttons -->
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{{ url_for('admin.admin_doctors') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back

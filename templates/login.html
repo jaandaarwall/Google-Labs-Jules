@@ -15,7 +15,6 @@
                     </div>
 
                     <form method="POST" action="{{ url_for('common.login') }}" novalidate>
-                        <!-- Role Selection -->
                         <div class="mb-4">
                             <label class="form-label fw-bold">Login As:</label>
                             <div class="btn-group w-100" role="group">
@@ -36,7 +35,6 @@
                             </div>
                         </div>
 
-                        <!-- Username -->
                         <div class="mb-3">
                             <label for="username" class="form-label">Username or Email</label>
                             <div class="input-group">
@@ -46,7 +44,6 @@
                             </div>
                         </div>
 
-                        <!-- Password -->
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
                             <div class="input-group">
@@ -64,7 +61,6 @@
                             <a href="{{ url_for('common.forgot_password') }}" class="text-decoration-none">Forgot Password?</a>
                         </div>
 
-                        <!-- Submit Button -->
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-sign-in-alt"></i> Login
@@ -74,7 +70,6 @@
 
                     <hr class="my-4">
 
-                    <!-- Additional Links -->
                     <div class="text-center">
                         <p class="mb-2">Don't have an account?</p>
                         <a href="{{ url_for('common.register') }}" class="btn btn-outline-primary">

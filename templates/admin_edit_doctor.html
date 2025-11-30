@@ -19,14 +19,12 @@
             <div class="card-body p-4">
                 <form method="POST" action="{{ url_for('admin.admin_edit_doctor', doctor_id=doctor.id) }}">
                     <div class="row">
-                        <!-- Full Name -->
                         <div class="col-md-6 mb-3">
                             <label for="full_name" class="form-label">Full Name *</label>
                             <input type="text" class="form-control" id="full_name" name="full_name" 
                                    value="{{ doctor.user.full_name }}" required>
                         </div>
 
-                        <!-- Username (Read-only) -->
                         <div class="col-md-6 mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" value="{{ doctor.user.username }}" readonly disabled>
@@ -40,14 +38,12 @@
                                    value="{{ doctor.user.email }}" required>
                         </div>
 
-                        <!-- Phone -->
                         <div class="col-md-6 mb-3">
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="tel" class="form-control" id="phone" name="phone" 
                                    value="{{ doctor.user.phone or '' }}" pattern="[0-9]{10}">
                         </div>
 
-                        <!-- Department/Specialization -->
                         <div class="col-md-6 mb-3">
                             <label for="department_id" class="form-label">Specialization *</label>
                             <select class="form-select" id="department_id" name="department_id" required>
@@ -59,14 +55,12 @@
                             </select>
                         </div>
 
-                        <!-- Qualification -->
                         <div class="col-md-6 mb-3">
                             <label for="qualification" class="form-label">Qualification</label>
                             <input type="text" class="form-control" id="qualification" name="qualification" 
                                    value="{{ doctor.qualification or '' }}">
                         </div>
 
-                        <!-- Experience Years -->
                         <div class="col-md-12 mb-3">
                             <label for="experience_years" class="form-label">Years of Experience</label>
                             <input type="number" class="form-control" id="experience_years" name="experience_years" 
@@ -74,7 +68,6 @@
                         </div>
                     </div>
 
-                    <!-- Buttons -->
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{{ url_for('admin.admin_doctors') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Back

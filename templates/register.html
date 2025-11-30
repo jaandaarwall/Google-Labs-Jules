@@ -16,55 +16,47 @@
 
                     <form method="POST" action="{{ url_for('common.register') }}">
                         <div class="row">
-                            <!-- Full Name -->
                             <div class="col-md-12 mb-3">
                                 <label for="full_name" class="form-label">Full Name *</label>
                                 <input type="text" class="form-control" id="full_name" name="full_name" 
                                        placeholder="Enter your full name" required minlength="2">
                             </div>
 
-                            <!-- Username -->
                             <div class="col-md-6 mb-3">
                                 <label for="username" class="form-label">Username *</label>
                                 <input type="text" class="form-control" id="username" name="username" 
                                        placeholder="Choose a username" required minlength="3">
                             </div>
 
-                            <!-- Email -->
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label">Email *</label>
                                 <input type="email" class="form-control" id="email" name="email" 
                                        placeholder="your.email@example.com" required>
                             </div>
 
-                            <!-- Password -->
                             <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label">Password *</label>
                                 <input type="password" class="form-control" id="password" name="password" 
                                        placeholder="Create a strong password" required minlength="6">
                             </div>
 
-                            <!-- Confirm Password -->
                             <div class="col-md-6 mb-3">
                                 <label for="confirm_password" class="form-label">Confirm Password *</label>
                                 <input type="password" class="form-control" id="confirm_password" name="confirm_password" 
                                        placeholder="Re-enter password" required minlength="6">
                             </div>
 
-                            <!-- Phone -->
                             <div class="col-md-6 mb-3">
                                 <label for="phone" class="form-label">Phone Number</label>
                                 <input type="tel" class="form-control" id="phone" name="phone" 
                                        placeholder="10-digit number" pattern="[0-9]{10}" required>
                             </div>
 
-                            <!-- Date of Birth -->
                             <div class="col-md-6 mb-3">
                                 <label for="date_of_birth" class="form-label">Date of Birth</label>
                                 <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
                             </div>
 
-                            <!-- Gender -->
                             <div class="col-md-6 mb-3">
                                 <label for="gender" class="form-label">Gender</label>
                                 <select class="form-select" id="gender" name="gender">
@@ -75,7 +67,6 @@
                                 </select>
                             </div>
 
-                            <!-- Blood Group -->
                             <div class="col-md-6 mb-3">
                                 <label for="blood_group" class="form-label">Blood Group</label>
                                 <select class="form-select" id="blood_group" name="blood_group">
@@ -91,14 +82,12 @@
                                 </select>
                             </div>
 
-                            <!-- Address -->
                             <div class="col-md-12 mb-3">
                                 <label for="address" class="form-label">Address</label>
                                 <textarea class="form-control" id="address" name="address" rows="2" 
                                           placeholder="Enter your complete address"></textarea>
                             </div>
 
-                            <!-- Terms and Conditions -->
                             <div class="col-md-12 mb-3">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="terms" required>
@@ -109,7 +98,6 @@
                             </div>
                         </div>
 
-                        <!-- Submit Button -->
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-user-plus"></i> Register
@@ -119,7 +107,6 @@
 
                     <hr class="my-4">
 
-                    <!-- Login Link -->
                     <div class="text-center">
                         <p class="mb-0">Already have an account? 
                             <a href="{{ url_for('common.login') }}" class="fw-bold">Login here</a>
@@ -132,7 +119,6 @@
 </div>
 
 <script>
-    // Password match validation
     document.querySelector('form').addEventListener('submit', function(e) {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;

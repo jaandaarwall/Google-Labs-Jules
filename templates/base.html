@@ -5,21 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Hospital Management System{% endblock %}</title>
     
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-white">
         <div class="container-fluid">
-            <!-- Sidebar Toggle Button (Visible only on mobile) -->
-            <!-- UPDATED: Now triggers 'offcanvas' instead of 'collapse' -->
             <button class="btn btn-outline-primary d-md-none me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
                 <i class="fas fa-bars"></i>
             </button>
@@ -28,14 +22,10 @@
                 <i class="fas fa-heartbeat text-primary me-2"></i> HMS Portal
             </a>
 
-            <!-- Right Navbar Toggle Button -->
-            <!-- UPDATED: Now triggers 'offcanvas' for right menu -->
             <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <!-- Right Menu Container -->
-            <!-- UPDATED: Uses offcanvas-lg offcanvas-end to slide from right on mobile, regular navbar on desktop -->
             <div class="offcanvas-lg offcanvas-end flex-grow-1" tabindex="-1" id="navbarNav" aria-labelledby="offcanvasNavbarLabel">
                 <div class="offcanvas-header border-bottom">
                     <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
@@ -71,16 +61,12 @@
         </div>
     </nav>
 
-    <!-- Main Container -->
     <div class="container-fluid" style="margin-top: 60px;">
         <div class="row">
-            <!-- Sidebar Block: Child templates will include the specific sidebar here -->
             {% block sidebar %}{% endblock %}
             
-            <!-- Main Content -->
             <main class="{% if session.user_id %}col-md-9 ms-sm-auto col-lg-10{% else %}col-12{% endif %}">
                 <div class="content-wrapper">
-                    <!-- Flash Messages -->
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             <div class="container-fluid px-0 mb-4">

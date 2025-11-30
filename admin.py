@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from models import db, User, Role, Doctor, Patient, Department, Appointment, Payment
 from datetime import date
 from sqlalchemy import or_
-import mail  # Importing the mail module
+import mail 
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -109,8 +109,7 @@ def admin_toggle_doctor(doctor_id):
     doctor.user.is_active = new_status
     
     msg_extra = ""
-    if not new_status: # If deactivating
-        # Cancel all future appointments
+    if not new_status: 
         future_appointments = Appointment.query.filter(
             Appointment.doctor_id == doctor.id,
             Appointment.appointment_date >= date.today(),
@@ -120,12 +119,10 @@ def admin_toggle_doctor(doctor_id):
         count = 0
         for appt in future_appointments:
             appt.status = 'Cancelled'
-            # Refund Payment
             payment = Payment.query.filter_by(appointment_id=appt.id).first()
             if payment and payment.status == 'Success':
                 payment.status = 'Refunded'
             
-            # Send Email Notification to Patient
             try:
                 subject = "Important: Appointment Cancelled"
                 body = f"""Dear {appt.patient.user.full_name},
@@ -161,7 +158,6 @@ def admin_patients():
 def admin_toggle_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
 
-    # Prevent deactivation of the main admin account
     if patient.user.username == 'admin':
         flash('Cannot deactivate the system administrator account.', 'danger')
         return redirect(url_for('admin.admin_patients'))
@@ -170,8 +166,7 @@ def admin_toggle_patient(patient_id):
     patient.user.is_active = new_status
     
     msg_extra = ""
-    if not new_status: # If deactivating
-        # Cancel all future appointments
+    if not new_status: 
         future_appointments = Appointment.query.filter(
             Appointment.patient_id == patient.id,
             Appointment.appointment_date >= date.today(),

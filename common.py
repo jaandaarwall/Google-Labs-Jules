@@ -3,17 +3,15 @@ from models import db, User, Role, Doctor, Patient
 from datetime import datetime, date
 from sqlalchemy import or_
 from werkzeug.security import generate_password_hash
-import mail # Import the mail module
+import mail 
 
 common_bp = Blueprint('common', __name__)
 
-# Simple in-memory store for rate limiting (IP -> Date)
-# In production, use Redis or Database
+
 registration_log = {}
 
 @common_bp.before_app_request
 def check_account_status():
-    """Global check to expire session if user is deactivated"""
     if 'user_id' in session:
         user = User.query.get(session['user_id'])
         if not user or not user.is_active:
@@ -23,7 +21,6 @@ def check_account_status():
 
 @common_bp.route('/')
 def index():
-    """Landing page with auto-redirect if logged in"""
     if 'user_id' in session:
         role = session.get('user_role')
         if role == 'admin': return redirect(url_for('admin.admin_dashboard'))
@@ -34,8 +31,6 @@ def index():
 
 @common_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Unified login page"""
-    # Auto-redirect if already logged in
     if 'user_id' in session:
         return redirect(url_for('common.index'))
 
@@ -87,9 +82,7 @@ def logout():
 
 @common_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    """Patient registration with 1-per-day rate limit"""
     if request.method == 'POST':
-        # 1. Rate Limit Check
         user_ip = request.remote_addr
         today = date.today()
         
@@ -135,7 +128,6 @@ def register():
         db.session.add(new_patient)
         db.session.commit()
 
-        # Log the registration for rate limiting
         registration_log[user_ip] = today
 
         flash('Registration successful! Please login.', 'success')
@@ -170,8 +162,6 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
         
         if user:
-            # In a real app, generate a secure token. 
-            # Here we will generate a temporary password for simplicity as requested.
             import secrets
             temp_pass = secrets.token_hex(4)
             user.set_password(temp_pass)

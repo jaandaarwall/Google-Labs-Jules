@@ -30,7 +30,6 @@ class User(db.Model):
 
     # Relationships
     roles = db.relationship('Role', secondary='user_roles', backref=db.backref('users', lazy='dynamic'))
-    # We keep these to access profile from user side if needed
     doctor_profile = db.relationship('Doctor', backref='user', uselist=False, cascade='all, delete-orphan')
     patient_profile = db.relationship('Patient', backref='user', uselist=False, cascade='all, delete-orphan')
 
@@ -52,12 +51,9 @@ class Department(db.Model):
     price = db.Column(db.Float, default=500.0) 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Relationship
     doctors = db.relationship('Doctor', backref='department', lazy=True)
 
-    @property
-    def doctors_count(self):
-        return len(self.doctors)
+
 
 class Doctor(db.Model):
     __tablename__ = 'doctor'
@@ -68,7 +64,6 @@ class Doctor(db.Model):
     qualification = db.Column(db.String(200))
     experience_years = db.Column(db.Integer, default=0)
     
-    # Relationships
     appointments = db.relationship('Appointment', backref='doctor', lazy=True)
     availability = db.relationship('DoctorAvailability', backref='doctor', lazy=True, cascade='all, delete-orphan')
 
@@ -82,7 +77,6 @@ class Patient(db.Model):
     address = db.Column(db.Text)
     blood_group = db.Column(db.String(5))
     
-    # Relationships
     appointments = db.relationship('Appointment', backref='patient', lazy=True)
 
 class DoctorAvailability(db.Model):

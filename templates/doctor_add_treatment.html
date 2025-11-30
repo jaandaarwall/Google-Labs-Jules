@@ -47,7 +47,6 @@
                     Follow-up Required?
                 </label>
             </div>
-            <!-- Ensure display logic matches initial checkbox state -->
             <div class="mb-3" id="follow-up-date-div" style="display: {% if appointment.treatment and appointment.treatment.follow_up_required %}block{% else %}none{% endif %};">
                 <label for="follow_up_date" class="form-label">Follow-up Date</label>
                 <input type="date" class="form-control" id="follow_up_date" name="follow_up_date" value="{{ appointment.treatment.follow_up_date.strftime('%Y-%m-%d') if appointment.treatment and appointment.treatment.follow_up_date }}">
@@ -76,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     checkbox.addEventListener('change', toggleDate);
-    // Ensure correct state on load
     toggleDate();
 });
 </script>

@@ -4,7 +4,6 @@ from datetime import datetime, timedelta, date
 from config import Config
 import os
 
-# Import Blueprints
 from admin import admin_bp
 from doctor import doctor_bp
 from patient import patient_bp
@@ -13,10 +12,8 @@ from common import common_bp
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Initialize database
 db.init_app(app)
 
-# Make datetime available in templates
 app.jinja_env.globals.update(datetime=datetime, timedelta=timedelta)
 
 # Register Blueprints
@@ -25,7 +22,6 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(doctor_bp)
 app.register_blueprint(patient_bp)
 
-# --- Helper for Role Creation (Simulating datastore) ---
 class UserDatastore:
     def find_or_create_role(self, name, description=None):
         role = Role.query.filter_by(name=name).first()
@@ -39,17 +35,13 @@ class UserDatastore:
 user_datastore = UserDatastore()
 
 def init_database():
-    """Initialize database, create roles, and ensure Admin has ALL profiles"""
     with app.app_context():
         db.create_all()
 
-        # 1. Create Roles programmatically
-        print("⚡ Initializing Roles...")
         admin_role = user_datastore.find_or_create_role(name='admin', description='Administrator')
         doctor_role = user_datastore.find_or_create_role(name='doctor', description='Doctor')
         patient_role = user_datastore.find_or_create_role(name='patient', description='Patient')
 
-        # 2. Create Departments FIRST
         if Department.query.count() == 0:
             departments = [
                 Department(name='Cardiology', description='Heart and cardiovascular system', price=1500.0),
@@ -63,11 +55,9 @@ def init_database():
                 db.session.add(dept)
             db.session.commit()
 
-        # 3. Create or Update Admin User
         admin_user = User.query.filter_by(username='admin').first()
         
         if not admin_user:
-            print("   + Creating Admin User...")
             admin_user = User(
                 username='admin',
                 email='admin@hospital.com',
@@ -76,20 +66,16 @@ def init_database():
             )
             admin_user.set_password('admin123')
             db.session.add(admin_user)
-            db.session.commit() # Commit to get ID
+            db.session.commit() 
         
-        # --- SELF-HEALING: Ensure Admin has all roles and profiles ---
         
-        # Ensure Roles
         if not admin_user.has_role('admin'): admin_user.roles.append(admin_role)
         if not admin_user.has_role('doctor'): admin_user.roles.append(doctor_role)
         if not admin_user.has_role('patient'): admin_user.roles.append(patient_role)
         
         db.session.commit()
 
-        # Ensure Doctor Profile
         if not Doctor.query.filter_by(user_id=admin_user.id).first():
-            print("   + Adding missing Doctor profile to Admin")
             first_dept = Department.query.first()
             admin_doctor = Doctor(
                 user_id=admin_user.id,
@@ -101,7 +87,6 @@ def init_database():
 
         # Ensure Patient Profile
         if not Patient.query.filter_by(user_id=admin_user.id).first():
-            print("   + Adding missing Patient profile to Admin")
             admin_patient = Patient(
                 user_id=admin_user.id,
                 date_of_birth=date(1990, 1, 1),
@@ -112,13 +97,11 @@ def init_database():
             db.session.add(admin_patient)
 
         db.session.commit()
-        print("✅ Database check complete.")
 
 if __name__ == '__main__':
     if not os.path.exists('hospital.db'):
         init_database()
     else:
-        # Run init anyway to check/fix roles
         init_database()
         
     app.run(debug=True, port=8000)

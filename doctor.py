@@ -47,7 +47,6 @@ def doctor_dashboard():
 def doctor_appointments():
     user_id = session.get('user_id')
     doctor = Doctor.query.filter_by(user_id=user_id).first()
-    # HIDE PENDING PAYMENTS
     appointments = Appointment.query.filter(
         Appointment.doctor_id == doctor.id,
         Appointment.status != 'Pending Payment'
