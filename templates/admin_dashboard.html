@@ -12,22 +12,22 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('admin_manage_doctors') }}">
                     <i class="fas fa-user-md"></i> Manage Doctors
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('admin_manage_patients') }}">
                     <i class="fas fa-users"></i> Manage Patients
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('admin_all_appointments') }}">
                     <i class="fas fa-calendar-alt"></i> All Appointments
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link" href="{{ url_for('admin_manage_departments') }}">
                     <i class="fas fa-hospital"></i> Departments
                 </a>
             </li>
@@ -129,22 +129,22 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-primary w-100">
+                        <a href="{{ url_for('admin_manage_doctors') }}" class="btn btn-primary w-100">
                             <i class="fas fa-user-plus"></i><br>Add New Doctor
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-success w-100">
+                        <a href="{{ url_for('admin_all_appointments') }}" class="btn btn-success w-100">
                             <i class="fas fa-calendar-plus"></i><br>View All Appointments
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-info w-100">
+                        <a href="{{ url_for('admin_manage_patients') }}" class="btn btn-info w-100">
                             <i class="fas fa-search"></i><br>Search Patients
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-warning w-100">
+                        <a href="{{ url_for('admin_manage_departments') }}" class="btn btn-warning w-100">
                             <i class="fas fa-hospital"></i><br>Manage Departments
                         </a>
                     </div>
